@@ -1,126 +1,380 @@
+
 {
-  "staffRoleId": "1559659267269595147",
+  "staffRoleId": "1563966385128874055",
   "roleHierarchy": [
     {
       "category": "Founder",
       "roles": [
-        { "id": "1559659267441819689", "name": "《 Server Founder", "position": 1 }
+        {
+          "id": "1563966249690730586",
+          "name": "《 Server Founder",
+          "position": 1
+        }
       ]
     },
     {
       "category": "Owner",
       "roles": [
-        { "id": "1559659267408134201", "name": "《Owner", "position": 2 }
+        {
+          "id": "1563966256002891968",
+          "name": "《 Owner",
+          "position": 2
+        },
+        {
+          "id": "1563966258272018616",
+          "name": "《 Owner Assistent",
+          "position": 4
+        }
       ]
     },
     {
       "category": "Co.Owner",
       "roles": [
-        { "id": "1559659267408134200", "name": "《Co. Owner", "position": 3 }
+        {
+          "id": "1563966257013985332",
+          "name": "《 Co. Owner",
+          "position": 3
+        }
       ]
     },
     {
-      "category": "Developer",
+      "category": "Discord-Leitung & Developer",
       "roles": [
-        { "id": "1559659267395428541", "name": "[Dev] ✗ Developer", "position": 4 }
+        {
+          "id": "1563966262898593846",
+          "name": "[DL] ✗ Discord Leitung",
+          "position": 5
+        },
+        {
+          "id": "1563966265566171218",
+          "name": "[Dev] ✗ Developer",
+          "position": 6
+        }
       ]
     },
     {
       "category": "Projektleitung",
       "roles": [
-        { "id": "1559659267395428537", "name": "[LPL] ✗ Leitende Projektleitung", "position": 5 },
-        { "id": "1559659267395428536", "name": "[PL] ✗ Projektleitung", "position": 6 },
-        { "id": "1559659267395428535", "name": "[Stv.PL] ✗ Stv. Projektleitung", "position": 7 }
+        {
+          "id": "1563966270796472360",
+          "name": "[LPL] ✗ Leitende Projektleitung",
+          "position": 7
+        },
+        {
+          "id": "1563966271874269256",
+          "name": "[PL] ✗ Projektleitung",
+          "position": 8
+        },
+        {
+          "id": "1563966273388417135",
+          "name": "[Stv.PL] ✗ Stv. Projektleitung",
+          "position": 9
+        },
+        {
+          "id": "1563966276483944469",
+          "name": "[HTA] ✗ High-Team-Ausbilder",
+          "position": 10
+        }
       ]
     },
     {
-      "category": "Direktor",
+      "category": "Hauptleitung",
       "roles": [
-        { "id": "1559659267349553272", "name": "━━Direktor━━", "position": 11 },
-        { "id": "1559659267378778216", "name": "[LDT] ✗ Leitender Direktor", "position": 12 },
-        { "id": "1559659267378778215", "name": "[DT] ✗ Direktor", "position": 13 },
-        { "id": "1559659267378778214", "name": "[Stv.DT] ✗ Stv. Direktor", "position": 14 }
+        {
+          "id": "1563966278442553376",
+          "name": "[HL] ✗ Hauptleitung",
+          "position": 11
+        },
+        {
+          "id": "1563966279927472219",
+          "name": "[Stv.HL] ✗ Stv. Hauptleitung",
+          "position": 12
+        }
+      ]
+    },
+    {
+      "category": "Gesamtleitung",
+      "roles": [
+        {
+          "id": "1563966284293738647",
+          "name": "[GL] ✗ Gesamtleitung",
+          "position": 13
+        },
+        {
+          "id": "1563966284880941127",
+          "name": "[Stv.GL] ✗ Stv. Gesamtleitung",
+          "position": 14
+        }
+      ]
+    },
+    {
+      "category": "Highteamleitung",
+      "roles": [
+        {
+          "id": "1563966288437452901",
+          "name": "[HTL] ✗ Highteamleitung",
+          "position": 15
+        },
+        {
+          "id": "1563966290308370533",
+          "name": "[Stv.HTL] ✗ Stv. Highteamleitung",
+          "position": 16
+        }
+      ]
+    },
+    {
+      "category": "Serverleitung",
+      "roles": [
+        {
+          "id": "1563966292854177866",
+          "name": "[SL] ✗ Serverleitung",
+          "position": 17
+        },
+        {
+          "id": "1563966294259400727",
+          "name": "[Stv.SL] ✗ Stv. Serverleitung",
+          "position": 18
+        }
+      ]
+    },
+    {
+      "category": "Direktion",
+      "roles": [
+        {
+          "id": "1563966297828499647",
+          "name": "[PD] ✗ Projekt Direktor",
+          "position": 19
+        },
+        {
+          "id": "1563966298839457883",
+          "name": "[DT] ✗ Direktor",
+          "position": 20
+        },
+        {
+          "id": "1563966300164722859",
+          "name": "[Stv.DT] ✗ Stv. Direktor",
+          "position": 21
+        }
       ]
     },
     {
       "category": "Management",
       "roles": [
-        { "id": "1559659267349553265", "name": "━━Managment━━", "position": 15 },
-        { "id": "1559659267349553269", "name": "[LMA] ✗ Leitender Manager", "position": 16 },
-        { "id": "1559659267349553268", "name": "[MA] ✗ Manager", "position": 17 },
-        { "id": "1559659267349553267", "name": "[Stv.MA] ✗ Stv. Manager", "position": 18 }
-      ]
-    },
-    {
-      "category": "Supervisor",
-      "roles": [
-        { "id": "1559659267324256373", "name": "━━━━━Supervisor━━━━", "position": 19 },
-        { "id": "1559659267349553264", "name": "[LSV] ✗ Leitender Supervisor", "position": 20 },
-        { "id": "1559659267349553263", "name": "[SV] ✗  Supervisor", "position": 21 },
-        { "id": "1559659267324256375", "name": "[Stv.SV] ✗ Stv. Supervisor", "position": 22 }
+        {
+          "id": "1563966307433447606",
+          "name": "[LMA] ✗ Leitender Manager",
+          "position": 22
+        },
+        {
+          "id": "1563966308167721032",
+          "name": "[MA] ✗ Manager",
+          "position": 23
+        },
+        {
+          "id": "1563966309107237006",
+          "name": "[Stv.MA] ✗ Stv. Manager",
+          "position": 24
+        }
       ]
     },
     {
       "category": "Teamleitung",
       "roles": [
-        { "id": "1559659267324256366", "name": "━━━Teamleitung━━", "position": 23 },
-        { "id": "1559659267324256370", "name": "[LTL] ✗ Leitende Teamleitung", "position": 24 },
-        { "id": "1559659267324256369", "name": "[TL] ✗ Teamleitung", "position": 25 },
-        { "id": "1559659267324256368", "name": "[Stv.TL] ✗ Stv. Teamleitung", "position": 26 }
+        {
+          "id": "1563966312710012949",
+          "name": "[LTL] ✗ Leitende Teamleitung",
+          "position": 25
+        },
+        {
+          "id": "1563966313796206774",
+          "name": "[TL] ✗ Teamleitung",
+          "position": 26
+        },
+        {
+          "id": "1563966315532918867",
+          "name": "[Stv.TL] ✗ Stv. Teamleitung",
+          "position": 27
+        }
       ]
     },
     {
-      "category": "Low-Ausbilder",
+      "category": "Regelverwaltung",
       "roles": [
-        { "id": "1559659267307339843", "name": "━━━Low-Ausbilder━━", "position": 27 },
-        { "id": "1559659267307339846", "name": "[AS] ✗ LAusbilder", "position": 28 },
-        { "id": "1559659267307339845", "name": "[Stv.AS] ✗ Stv.Ausbilder", "position": 29 }
+        {
+          "id": "1563966318712062022",
+          "name": "[RV] ✗ Regelverwaltung",
+          "position": 28
+        },
+        {
+          "id": "1563966319815032862",
+          "name": "[Stv.RV] ✗ Stv. Regelverwaltung",
+          "position": 29
+        }
       ]
     },
     {
-      "category": "Fraktionsverwaltung",
+      "category": "Abteilungsleitungen",
       "roles": [
-        { "id": "1559659267307339839", "name": "━━━Fraktionsverwaltung━━", "position": 30 },
-        { "id": "1559659267307339842", "name": "[FV] ✗ Fraktionsverwaltung", "position": 31 },
-        { "id": "1559659267307339841", "name": "[Stv.FV] ✗ Stv. Fraktionsverwaltung", "position": 32 }
+        {
+          "id": "1563966322285482044",
+          "name": "[AL] ✗ Admin Leitung",
+          "position": 30
+        },
+        {
+          "id": "1563966323266953229",
+          "name": "[ML] ✗ Mod Leitung",
+          "position": 31
+        },
+        {
+          "id": "1563966325452312738",
+          "name": "[SPL] ✗ Supportleitung",
+          "position": 32
+        },
+        {
+          "id": "1563966327742267544",
+          "name": "[Stv.SPL] ✗ Stv. Supportleitung",
+          "position": 33
+        }
+      ]
+    },
+    {
+      "category": "Highteam",
+      "roles": [
+        {
+          "id": "1563966339025080504",
+          "name": "[HT] ✗ High Team",
+          "position": 34
+        },
+        {
+          "id": "1563966340191092943",
+          "name": "[HTA] ✗ Highteam Anwärter",
+          "position": 35
+        }
       ]
     },
     {
       "category": "Eventleitung",
       "roles": [
-        { "id": "1559659267299217467", "name": "━━━Eventleitung━━", "position": 33 },
-        { "id": "1559659267307339838", "name": "[EL] ✗ Eventleitung", "position": 34 },
-        { "id": "1559659267307339837", "name": "[Stv.EL] ✗ Stv. Eventleitung", "position": 35 }
+        {
+          "id": "1563966343773036739",
+          "name": "[EL] ✗ Eventleitung",
+          "position": 36
+        },
+        {
+          "id": "1563966345438302349",
+          "name": "[Stv.EL] ✗ Stv. Eventleitung",
+          "position": 37
+        }
+      ]
+    },
+    {
+      "category": "Fraktionsverwaltung",
+      "roles": [
+        {
+          "id": "1563966347875061790",
+          "name": "[FV] ✗ Fraktionsverwaltung",
+          "position": 38
+        },
+        {
+          "id": "1563966348953002125",
+          "name": "[Stv.FV] ✗ Stv. Fraktionsverwaltung",
+          "position": 39
+        }
+      ]
+    },
+    {
+      "category": "Ausbilder",
+      "roles": [
+        {
+          "id": "1563966351154872340",
+          "name": "[AS] ✗ Ausbilder",
+          "position": 40
+        }
       ]
     },
     {
       "category": "Administrator",
       "roles": [
-        { "id": "1559659267299217462", "name": "━━━Administrator━━", "position": 36 },
-        { "id": "1559659267299217466", "name": "[Head Admin] ✗ Head Administrator", "position": 37 },
-        { "id": "1559659267299217465", "name": "[Sr.Admin] ✗ Sr. Administrator", "position": 38 },
-        { "id": "1559659267299217464", "name": "[Admin] ✗ Administrator", "position": 39 },
-        { "id": "1559659267299217463", "name": "[Jr.Admin] ✗ Jr. Administrator", "position": 40 }
+        {
+          "id": "1563966355143917712",
+          "name": "[Sr.Admin] ✗ Senior Administrator",
+          "position": 41
+        },
+        {
+          "id": "1563966357291139284",
+          "name": "[Admin] ✗ Administrator",
+          "position": 42
+        },
+        {
+          "id": "1563966358549569586",
+          "name": "[Jr.Admin] ✗ Junior Administrator",
+          "position": 43
+        },
+        {
+          "id": "1563966360541995170",
+          "name": "[T.Admin] ✗ Test Administrator",
+          "position": 44
+        }
       ]
     },
     {
       "category": "Moderator",
       "roles": [
-        { "id": "1559659267269595154", "name": "━━━Moderator━━", "position": 41 },
-        { "id": "1559659267299217461", "name": "[Head Mod] ✗ Head Moderator", "position": 42 },
-        { "id": "1559659267299217460", "name": "[Sr.Mod] ✗ Sr. Moderator", "position": 43 },
-        { "id": "1559659267299217459", "name": "[Mod] ✗ Moderator", "position": 44 },
-        { "id": "1559659267269595155", "name": "[Jr.Mod] ✗ Jr. Moderator", "position": 45 }
+        {
+          "id": "1563966366208499733",
+          "name": "[Sr.Mod] ✗ Senior Moderator",
+          "position": 45
+        },
+        {
+          "id": "1563966367793807461",
+          "name": "[Mod] ✗ Moderator",
+          "position": 46
+        },
+        {
+          "id": "1563966370272772117",
+          "name": "[Jr.Mod] ✗ Junior Moderator",
+          "position": 47
+        },
+        {
+          "id": "1563966371656765524",
+          "name": "[T.Mod] ✗ Test Moderator",
+          "position": 48
+        }
       ]
     },
     {
       "category": "Supporter",
       "roles": [
-        { "id": "1559659267269595149", "name": "━━━Supporter━━", "position": 46 },
-        { "id": "1559659267269595153", "name": "[Head Sup] ✗ Head Supporter", "position": 47 },
-        { "id": "1559659267269595152", "name": "[Sr.Sup] ✗ Sr. Supporter", "position": 48 },
-        { "id": "1559659267269595151", "name": "[Sup] ✗ Supporter", "position": 49 },
-        { "id": "1559659267269595150", "name": "[T-Sup] ✗ Test Supporter", "position": 50 }
+        {
+          "id": "1563966378162266204",
+          "name": "[Sr.Sup] ✗ Senior Supporter",
+          "position": 49
+        },
+        {
+          "id": "1563966378745135268",
+          "name": "[Sup] ✗ Supporter",
+          "position": 50
+        },
+        {
+          "id": "1563966380204884008",
+          "name": "[Jr.Sup] ✗ Junior Supporter",
+          "position": 51
+        },
+        {
+          "id": "1563966381802651668",
+          "name": "[T.Sup] ✗ Test Supporter",
+          "position": 52
+        }
+      ]
+    },
+    {
+      "category": "Serverteam",
+      "roles": [
+        {
+          "id": "1563966385128874055",
+          "name": "✗ Server Team",
+          "position": 53
+        }
       ]
     }
   ]

@@ -444,7 +444,7 @@ async function handleVorlage(interaction) {
             const embed = new EmbedBuilder()
                 .setColor(0x8052FF)
                 .setTitle(
-                    "💫 Vexo RP • Vorlagen-Vorschau"
+                    "💫 NoVex RP • Vorlagen-Vorschau"
                 )
                 .setDescription(
                     lines.join("\n\n") ||
@@ -547,7 +547,7 @@ async function handleVorlage(interaction) {
                     // Berechtigungen und Inhalte bleiben.
                     await channel.setName(
                         change.newName,
-                        "Vexo RP Vorlagen-System"
+                        "NoVex RP Vorlagen-System"
                     );
 
                     success++;
@@ -658,7 +658,7 @@ function initializeVorlagenSystem(client) {
     });
 
     console.log(
-        "💫 Vexo RP Vorlagen-System geladen."
+        "💫 NoVex RP Vorlagen-System geladen."
     );
 }
 

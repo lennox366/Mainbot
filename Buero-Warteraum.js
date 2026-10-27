@@ -2,7 +2,7 @@
 "use strict";
 
 // =====================================================
-// 🏢 VEXO RP | BÜRO-WARTERAUM-SYSTEM
+// 🏢 NoVex RP | BÜRO-WARTERAUM-SYSTEM
 // Discord.js v14
 //
 // Bürger betritt Warteraum

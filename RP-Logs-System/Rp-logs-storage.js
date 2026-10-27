@@ -44,7 +44,7 @@ function defaultConfig(guildId) {
     return {
         guildId: guildId,
 
-        // ---------- eigener, von Vexo RP erstellter RP-Webhook ----------
+        // ---------- eigener, von NoVex RP erstellter RP-Webhook ----------
         webhookId: null,
         webhookToken: null,
         webhookGuildId: null,
@@ -84,7 +84,7 @@ function updateGuildConfig(guildId, patch) {
 }
 
 // =====================================================
-// 🔗 EIGENER RP-WEBHOOK (von Vexo RP erstellt & verwaltet)
+// 🔗 EIGENER RP-WEBHOOK (von NoVex RP erstellt & verwaltet)
 // =====================================================
 
 function hasRpWebhook(guildId) {

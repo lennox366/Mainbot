@@ -67,7 +67,7 @@ function buildSettingsEmbed(guildId) {
 
     return new EmbedBuilder()
         .setColor(NEXORA_COLOR)
-        .setTitle("⚙️ Vexo RP – RP-Logs Einstellungen")
+        .setTitle("⚙️ NoVex RP – RP-Logs Einstellungen")
         .setDescription(
             `Verwalte hier die RP-Web-Logs-Verbindung für **${SETTINGS.serverName}**.`
         )
@@ -83,7 +83,7 @@ function buildSettingsEmbed(guildId) {
                 inline: true
             }
         )
-        .setFooter({ text: "Vexo RP • RP-Web-Logs-System" })
+        .setFooter({ text: "NoVex RP • RP-Web-Logs-System" })
         .setTimestamp();
 }
 
@@ -133,7 +133,7 @@ function buildStatusEmbed(guildId) {
 
     const embed = new EmbedBuilder()
         .setColor(config.webhookUrl ? 0x57F287 : 0xED4245)
-        .setTitle("📊 Vexo RP – RP-Logs Status")
+        .setTitle("📊 NoVex RP – RP-Logs Status")
         .setTimestamp();
 
     if (!config.webhookUrl) {
@@ -168,7 +168,7 @@ function buildWebLogsPanelEmbed() {
             RP_EVENT_CATEGORIES.join("\n") +
             "\n\n━━━━━━━━━━━━━━━━━━"
         )
-        .setFooter({ text: "Vexo RP • RP-Web-Logs-System" })
+        .setFooter({ text: "NoVex RP • RP-Web-Logs-System" })
         .setTimestamp();
 }
 
@@ -303,10 +303,10 @@ async function handleInteraction(interaction) {
             .addFields(
                 { name: "✅ Status", value: "Webhook erfolgreich verbunden.", inline: false },
                 { name: "🏙️ Server", value: SETTINGS.serverName, inline: true },
-                { name: "🤖 System", value: "Vexo RP", inline: true },
+                { name: "🤖 System", value: "NoVex RP", inline: true },
                 { name: "🕐 Zeitpunkt", value: formatTimestamp(), inline: true }
             )
-            .setFooter({ text: "Vexo RP • RP-Web-Logs-System" });
+            .setFooter({ text: "NoVex RP • RP-Web-Logs-System" });
 
         try {
             const webhookClient = new WebhookClient({ url: config.webhookUrl });

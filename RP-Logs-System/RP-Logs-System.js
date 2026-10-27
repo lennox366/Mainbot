@@ -67,7 +67,7 @@ function buildSettingsEmbed(guildId) {
 
     return new EmbedBuilder()
         .setColor(NEXORA_COLOR)
-        .setTitle("⚙️ Vexo RP – RP-Logs Einstellungen")
+        .setTitle("⚙️ NoVex RP – RP-Logs Einstellungen")
         .setDescription(
             `Verwalte hier die RP-Web-Logs-Verbindung für **${SETTINGS.serverName}**.`
         )
@@ -83,7 +83,7 @@ function buildSettingsEmbed(guildId) {
                 inline: true
             }
         )
-        .setFooter({ text: "Vexo RP • RP-Web-Logs-System" })
+        .setFooter({ text: "NoVex RP • RP-Web-Logs-System" })
         .setTimestamp();
 }
 
@@ -215,7 +215,7 @@ function buildChannelPageEmbed(guildId, pageItems, page, totalPages) {
         .setColor(NEXORA_COLOR)
         .setTitle("📺 Log-Kanal auswählen")
         .setDescription(description.trim())
-        .setFooter({ text: `Vexo RP • RP-Web-Logs-System • Seite ${page + 1} / ${totalPages}` })
+        .setFooter({ text: `NoVex RP • RP-Web-Logs-System • Seite ${page + 1} / ${totalPages}` })
         .setTimestamp();
 }
 
@@ -301,7 +301,7 @@ function buildStatusEmbed(guildId) {
 
     const embed = new EmbedBuilder()
         .setColor(hasWebhook ? 0x57F287 : 0xED4245)
-        .setTitle("📊 Vexo RP – RP-Logs Status")
+        .setTitle("📊 NoVex RP – RP-Logs Status")
         .setTimestamp();
 
     if (!hasWebhook) {
@@ -314,7 +314,7 @@ function buildStatusEmbed(guildId) {
     }
 
     embed.addFields(
-        { name: "🟢 RP-Webhook", value: "Aktiv (von Vexo RP verwaltet)", inline: true },
+        { name: "🟢 RP-Webhook", value: "Aktiv (von NoVex RP verwaltet)", inline: true },
         { name: "📺 Log-Kanal", value: config.webhookChannelId ? `<#${config.webhookChannelId}>` : "Nicht eingestellt", inline: true },
         { name: "📡 Verbindung", value: "Online", inline: true },
         { name: "🕐 Webhook erstellt", value: config.webhookCreatedAt ? formatTimestamp(new Date(config.webhookCreatedAt)) : "Unbekannt", inline: true },
@@ -341,7 +341,7 @@ function buildWebLogsPanelEmbed() {
             RP_EVENT_CATEGORIES.join("\n") +
             "\n\n━━━━━━━━━━━━━━━━━━"
         )
-        .setFooter({ text: "Vexo RP • RP-Web-Logs-System" })
+        .setFooter({ text: "NoVex RP • RP-Web-Logs-System" })
         .setTimestamp();
 }
 
@@ -414,7 +414,7 @@ async function handleInteraction(interaction) {
     }
 
     // ---------- RP-Webhook automatisch erstellen ----------
-    // Der Webhook wird von Vexo RP selbst über die Discord-API erstellt.
+    // Der Webhook wird von NoVex RP selbst über die Discord-API erstellt.
     // Es wird NIEMALS eine Webhook-URL manuell abgefragt oder angezeigt.
     if (interaction.customId === "rplogs_webhook_create") {
         if (storage.hasRpWebhook(guildId)) {
@@ -436,7 +436,7 @@ async function handleInteraction(interaction) {
             }
 
             const webhook = await targetChannel.createWebhook({
-                name: "Vexo RP RP-Logs",
+                name: "NoVex RP RP-Logs",
                 reason: `RP-Logs-Webhook erstellt von ${interaction.user.tag}`
             });
 
@@ -544,7 +544,7 @@ async function handleInteraction(interaction) {
             try {
                 const newChannel = await interaction.guild.channels.fetch(channelId);
                 const webhook = await newChannel.createWebhook({
-                    name: "Vexo RP RP-Logs",
+                    name: "NoVex RP RP-Logs",
                     reason: `RP-Log-Kanal geändert von ${interaction.user.tag}`
                 });
 
@@ -580,7 +580,7 @@ async function handleInteraction(interaction) {
         } catch (error) {
             console.error(`❌ [RP-Logs] RP-Webhook-Test fehlgeschlagen (Guild ${guildId}):`, error);
             return interaction.reply({
-                content: "❌ Der RP-Webhook konnte nicht erreicht werden. Möglicherweise wurde er außerhalb von Vexo RP gelöscht – versuche \"RP-Webhook entfernen\" und dann \"RP-Webhook erstellen\".",
+                content: "❌ Der RP-Webhook konnte nicht erreicht werden. Möglicherweise wurde er außerhalb von NoVex RP gelöscht – versuche \"RP-Webhook entfernen\" und dann \"RP-Webhook erstellen\".",
                 ephemeral: true
             });
         }
@@ -598,21 +598,21 @@ async function handleInteraction(interaction) {
 // Sendet einen Test-Log DIREKT über den eingerichteten RP-Log-Webhook
 // (unabhängig von der Roblox-API). Funktioniert dieser Test, aber ein
 // echtes Roblox-Event kommt nicht an, liegt der Fehler garantiert an
-// der Roblox → Vexo RP-API-Verbindung (Secret-Key/URL), nicht am Bot.
+// der Roblox → NoVex RP-API-Verbindung (Secret-Key/URL), nicht am Bot.
 
 function buildTestEmbed(guildId) {
     const config = storage.getGuildConfig(guildId);
 
     return new EmbedBuilder()
         .setColor(0x57F287)
-        .setTitle("🧪 Vexo RP RP-Logs")
+        .setTitle("🧪 NoVex RP RP-Logs")
         .setDescription("✅ Eigener RP-Webhook funktioniert.")
         .addFields(
-            { name: "📡 System", value: "Vexo RP RP-Logs", inline: true },
+            { name: "📡 System", value: "NoVex RP RP-Logs", inline: true },
             { name: "📺 Kanal", value: config.webhookChannelId ? `<#${config.webhookChannelId}>` : "Nicht eingestellt", inline: true },
             { name: "🕐 Zeitpunkt", value: formatTimestamp(), inline: true }
         )
-        .setFooter({ text: "Vexo RP • RP-Web-Logs-System" });
+        .setFooter({ text: "NoVex RP • RP-Web-Logs-System" });
 }
 
 async function handleTestCommand(message) {
@@ -636,7 +636,7 @@ async function handleTestCommand(message) {
         return message.reply(
             "✅ Test-Log wurde erfolgreich über den eigenen RP-Webhook gesendet.\n" +
             "ℹ️ Kommt später ein echtes Roblox-Event nicht an, liegt der Fehler an der " +
-            "**Roblox → Vexo RP-API-Verbindung** (z. B. falscher Secret-Key) " +
+            "**Roblox → NoVex RP-API-Verbindung** (z. B. falscher Secret-Key) " +
             "– nicht am RP-Webhook selbst, denn der wurde gerade erfolgreich getestet."
         );
     } catch (error) {

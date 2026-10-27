@@ -338,7 +338,7 @@ function createSuggestionEmbed(suggestion, showTeamNotes = false) {
             { name: "Letzte Änderung", value: formatGermanTime(new Date(suggestion.lastModifiedAt)), inline: true }
         )
         .setTimestamp(new Date(suggestion.createdAt))
-        .setFooter({ text: "Bürger-Vorschlagssystem ✧ Vexo RP" });
+        .setFooter({ text: "Bürger-Vorschlagssystem ✧ NoVex RP" });
 
     // Team-Notizen NUR für berechtigte Teammitglieder
     if (showTeamNotes && suggestion.teamNotes) {
@@ -357,7 +357,7 @@ function createSuggestionPanelEmbed() {
         .setColor(0x5865F2)
         .setTitle(BURGER_SUGGESTION_PANEL_TEXT.TITLE)
         .setDescription(BURGER_SUGGESTION_PANEL_TEXT.DESCRIPTION)
-        .setFooter({ text: "Bürger-Vorschlagssystem ✧ Vexo RP" });
+        .setFooter({ text: "Bürger-Vorschlagssystem ✧ NoVex RP" });
 }
 
 function createBurgerPanelEmbed() {
@@ -365,7 +365,7 @@ function createBurgerPanelEmbed() {
         .setColor(0x5865F2)
         .setTitle(BURGER_PANEL_TEXT.TITLE)
         .setDescription(BURGER_PANEL_TEXT.DESCRIPTION)
-        .setFooter({ text: "Bürger-Vorschlagssystem ✧ Vexo RP" });
+        .setFooter({ text: "Bürger-Vorschlagssystem ✧ NoVex RP" });
 }
 
 // =====================================================
@@ -646,7 +646,7 @@ async function sendSuggestionNotification(client, suggestion, oldStatus) {
                 { name: "Vorschlags-ID", value: `#${suggestion.id}`, inline: true }
             )
             .setTimestamp()
-            .setFooter({ text: "Bürger-Vorschlagssystem ✧ Vexo RP" });
+            .setFooter({ text: "Bürger-Vorschlagssystem ✧ NoVex RP" });
 
         await user.send({ embeds: [embed] });
         return true;
@@ -795,7 +795,7 @@ function initializeBuergerVorschlagSystem(client, options = {}) {
                     { name: "Kanal", value: `<#${message.channel.id}>`, inline: true },
                     { name: "Server", value: message.guild.name, inline: true }
                 )
-                .setFooter({ text: "Bürger-Vorschlagssystem ✧ Vexo RP" });
+                .setFooter({ text: "Bürger-Vorschlagssystem ✧ NoVex RP" });
 
             await message.channel.send({ embeds: [embed] });
 
@@ -868,7 +868,7 @@ function initializeBuergerVorschlagSystem(client, options = {}) {
                         { name: "Kanal", value: `<#${interaction.channel.id}>`, inline: true },
                         { name: "Server", value: interaction.guild.name, inline: true }
                     )
-                    .setFooter({ text: "Bürger-Vorschlagssystem ✧ Vexo RP" });
+                    .setFooter({ text: "Bürger-Vorschlagssystem ✧ NoVex RP" });
 
                 await interaction.channel.send({ embeds: [embed] });
                 return interaction.reply({
@@ -1426,7 +1426,7 @@ function initializeBuergerVorschlagSystem(client, options = {}) {
                         { name: "Von", value: `<@${member.id}>`, inline: true }
                     )
                     .setTimestamp()
-                    .setFooter({ text: "Bürger-Vorschlagssystem ✧ Vexo RP" });
+                    .setFooter({ text: "Bürger-Vorschlagssystem ✧ NoVex RP" });
 
                 const row = new ActionRowBuilder().addComponents(
                     new ButtonBuilder()

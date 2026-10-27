@@ -165,9 +165,9 @@ async function createTeamListEmbed(guild) {
 
         const embed = new EmbedBuilder()
             .setColor(0x5865F2)
-            .setTitle("VEXO RP • TEAMLISTE")
+            .setTitle("NoVex RP • TEAMLISTE")
             .setDescription("Alle Teammitglieder und ihre Rollen")
-            .setFooter({ text: "Vexo RP" })
+            .setFooter({ text: "NoVex RP" })
             .setTimestamp();
 
         for (const category of teamRolesConfig.roleHierarchy) {

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NoVex RP – Bot-Dashboard</title>
+<style>
+:root{--bg:#0D0C10;--s1:#151419;--s2:#1B191F;--tx:#F8F7F9;--tx2:#A8A3AD;--tx3:#706C76;--bd:#302B33;--o:#FF683B;--g:linear-gradient(135deg,#FF8755 0%,#FF663B 55%,#F4512E 100%);--ok:#3DD68C}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--tx);font:14px/1.5 system-ui,sans-serif;min-height:100vh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input{width:100%;padding:11px 14px;border-radius:14px;background:var(--s2);border:1px solid var(--bd);color:var(--tx)}
+input:focus{outline:0;border-color:var(--o)}
+header{display:flex;align-items:center;gap:16px;padding:16px 24px;background:var(--bg)}
+.logo{width:36px;height:36px;border-radius:12px;background:var(--g);display:grid;place-items:center;color:#fff}
+.nav{display:flex;gap:2px;padding:5px;border-radius:999px;background:var(--s1);border:1px solid var(--bd)}
+.nav button{padding:7px 16px;border-radius:999px;color:var(--tx2);font-weight:500}
+.nav button.on{background:var(--o);color:#fff}
+.main{max-width:1240px;margin:0 auto;padding:24px}
+.c{background:var(--s1);border:1px solid var(--bd);border-radius:24px;padding:22px;margin-bottom:16px}
+.hero{background:var(--g);color:#fff;padding:30px;border-radius:24px}
+.hero h2{font-size:32px;font-weight:600;margin-bottom:8px}
+.btn{padding:9px 16px;border-radius:999px;background:var(--s1);border:1px solid var(--bd);font-weight:500}
+.btn.o{background:var(--g);border:0;color:#fff}
+.login{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg)}
+.login .c{width:400px;padding:34px;border-radius:32px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}
+.tb{width:100%;border-collapse:collapse}
+.tb th{text-align:left;color:var(--tx3);font-size:12px;padding:8px}
+.tb td{padding:12px;border-top:1px solid var(--bd)}
+</style>
+</head>
+<body>
+<div id="login" class="login">
+ <div class="c">
+  <h2 style="font-size:28px;margin-bottom:8px">🔐 NoVex RP Dashboard</h2>
+  <p style="color:var(--tx2);margin-bottom:24px">Bitte anmelden</p>
+  <label style="display:block;font-size:12px;margin:8px 0 4px">Benutzername</label>
+  <input type="text" id="username" placeholder="admin">
+  <label style="display:block;font-size:12px;margin:8px 0 4px">Passwort</label>
+  <input type="password" id="password" placeholder="novex2026">
+  <button class="btn o" style="width:100%;margin-top:20px;padding:12px" onclick="login()">Anmelden</button>
+  <p id="error" style="color:var(--er);font-size:12px;margin-top:12px;display:none"></p>
+ </div>
+</div>
+
+<header id="header" style="display:none">
+ <div class="logo">🎃</div>
+ <nav class="nav" id="nav"></nav>
+ <div style="margin-left:auto">
+  <span id="user">admin</span>
+  <button class="btn" onclick="logout()" style="margin-left:8px">Abmelden</button>
+ </div>
+</header>
+
+<div class="main" id="main" style="display:none"></div>
+
+<script>
+// Konfiguration
+const CONFIG = {
+    ADMIN_USERNAME: "admin",
+    ADMIN_PASSWORD: "novex2026",
+    BOT_API_URL: localStorage.getItem('bot_api_url') || window.location.origin
+};
+
+// State
+let currentUser = null;
+let currentTab = 'overview';
+
+// Login System
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (username === CONFIG.ADMIN_USERNAME && password === CONFIG.ADMIN_PASSWORD) {
+        currentUser = { username, role: 'admin' };
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        showDashboard();
+    } else {
+        document.getElementById('error').textContent = 'Ungültige Anmeldedaten';
+        document.getElementById('error').style.display = 'block';
+    }
+}
+
+function logout() {
+    currentUser = null;
+    localStorage.removeItem('user');
+    showLogin();
+}
+
+function checkAuth() {
+    const saved = localStorage.getItem('user');
+    if (saved) {
+        currentUser = JSON.parse(saved);
+        showDashboard();
+    } else {
+        showLogin();
+    }
+}
+
+// UI Functions
+function showLogin() {
+    document.getElementById('login').style.display = 'grid';
+    document.getElementById('header').style.display = 'none';
+    document.getElementById('main').style.display = 'none';
+}
+
+function showDashboard() {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('header').style.display = 'flex';
+    document.getElementById('main').style.display = 'block';
+    document.getElementById('user').textContent = currentUser.username;
+    renderNav();
+    renderContent();
+}
+
+function renderNav() {
+    const tabs = [
+        { id: 'overview', label: 'Übersicht' },
+        { id: 'tickets', label: 'Tickets' },
+        { id: 'users', label: 'Benutzer' },
+        { id: 'settings', label: 'Einstellungen' }
+    ];
+    
+    document.getElementById('nav').innerHTML = tabs.map(tab => 
+        `<button class="${currentTab === tab.id ? 'on' : ''}" onclick="switchTab('${tab.id}')">${tab.label}</button>`
+    ).join('');
+}
+
+function switchTab(tab) {
+    currentTab = tab;
+    renderNav();
+    renderContent();
+}
+
+function renderContent() {
+    const main = document.getElementById('main');
+    
+    switch(currentTab) {
+        case 'overview':
+            main.innerHTML = renderOverview();
+            break;
+        case 'tickets':
+            main.innerHTML = renderTickets();
+            break;
+        case 'users':
+            main.innerHTML = renderUsers();
+            break;
+        case 'settings':
+            main.innerHTML = renderSettings();
+            break;
+    }
+}
+
+function renderOverview() {
+    return `
+        <div class="hero">
+            <h2>Willkommen im NoVex RP Dashboard</h2>
+            <p>Verwalte deinen Discord-Bot zentral an einem Ort.</p>
+        </div>
+        <div class="grid">
+            <div class="c">
+                <h3>Bot-Status</h3>
+                <div id="bot-status" style="margin-top:12px">
+                    <p>⏳ Klicke auf "Bot-Daten laden"</p>
+                </div>
+                <button class="btn o" style="margin-top:12px" onclick="loadBotData()">Bot-Daten laden</button>
+            </div>
+            <div class="c">
+                <h3>Team-Statistiken</h3>
+                <div id="team-stats" style="margin-top:12px">
+                    <p>⏳ Wird geladen...</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderTickets() {
+    return `
+        <div class="c">
+            <h3>Tickets</h3>
+            <button class="btn o" style="margin-top:12px" onclick="loadTickets()">Tickets laden</button>
+            <div id="tickets-list" style="margin-top:16px"></div>
+        </div>
+    `;
+}
+
+function renderUsers() {
+    return `
+        <div class="c">
+            <h3>Benutzerverwaltung</h3>
+            <p>Benutzername: admin (Hauptadministrator)</p>
+            <p style="color:var(--tx2);font-size:12px;margin-top:8px">Weitere Benutzer können hier hinzugefügt werden.</p>
+        </div>
+    `;
+}
+
+function renderSettings() {
+    return `
+        <div class="c">
+            <h3>API-Konfiguration</h3>
+            <label style="display:block;font-size:12px;margin:8px 0 4px">Bot API URL</label>
+            <input type="text" id="api-url" value="${CONFIG.BOT_API_URL}" placeholder="https://dein-bot-server.com">
+            <p style="color:var(--tx2);font-size:12px;margin-top:8px">Geben Sie hier die URL Ihres Bot-Servers ein</p>
+            <button class="btn o" style="margin-top:12px" onclick="saveApiUrl()">Speichern</button>
+        </div>
+    `;
+}
+
+// API Functions
+async function loadBotData() {
+    try {
+        const response = await fetch(`${CONFIG.BOT_API_URL}/api/bot/stats`);
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById('bot-status').innerHTML = `
+                <p>Status: ${data.online ? '🟢 Online' : '🔴 Offline'}</p>
+                <p>Bot: ${data.username || '—'}</p>
+                <p>Server: ${data.guilds || '0'}</p>
+                <p>Mitglieder: ${data.totalMembers || '0'}</p>
+                <p>Ping: ${data.ping ? Math.round(data.ping) + ' ms' : '—'}</p>
+            `;
+            
+            const teamResponse = await fetch(`${CONFIG.BOT_API_URL}/api/team/stats`);
+            if (teamResponse.ok) {
+                const teamData = await teamResponse.json();
+                document.getElementById('team-stats').innerHTML = `
+                    <p>Gesamt Staff: ${teamData.totalStaff || '0'}</p>
+                    <p>Online Staff: ${teamData.onlineStaff || '0'}</p>
+                    <p>Offline Staff: ${teamData.offlineStaff || '0'}</p>
+                `;
+            }
+        } else {
+            document.getElementById('bot-status').innerHTML = '<p style="color:var(--er)">Bot nicht erreichbar</p>';
+        }
+    } catch (error) {
+        document.getElementById('bot-status').innerHTML = '<p style="color:var(--er)">Fehler: ' + error.message + '</p>';
+    }
+}
+
+async function loadTickets() {
+    try {
+        const response = await fetch(`${CONFIG.BOT_API_URL}/api/tickets`);
+        if (response.ok) {
+            const data = await response.json();
+            const tickets = data.tickets || [];
+            
+            if (tickets.length === 0) {
+                document.getElementById('tickets-list').innerHTML = '<p>Keine Tickets vorhanden</p>';
+            } else {
+                const table = tickets.map(t => `
+                    <tr>
+                        <td>#${t.id.slice(-4)}</td>
+                        <td>${t.type}</td>
+                        <td>${t.status}</td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('tickets-list').innerHTML = `
+                    <table class="tb">
+                        <thead><tr><th>ID</th><th>Typ</th><th>Status</th></tr></thead>
+                        <tbody>${table}</tbody>
+                    </table>
+                `;
+            }
+        } else {
+            document.getElementById('tickets-list').innerHTML = '<p style="color:var(--er)">Tickets konnten nicht geladen werden</p>';
+        }
+    } catch (error) {
+        document.getElementById('tickets-list').innerHTML = '<p style="color:var(--er)">Fehler: ' + error.message + '</p>';
+    }
+}
+
+function saveApiUrl() {
+    const url = document.getElementById('api-url').value;
+    if (url) {
+        localStorage.setItem('bot_api_url', url);
+        CONFIG.BOT_API_URL = url;
+        alert('URL gespeichert!');
+    }
+}
+
+// Init
+document.getElementById('password').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') login();
+});
+
+checkAuth();
+</script>
+</body>
+</html>

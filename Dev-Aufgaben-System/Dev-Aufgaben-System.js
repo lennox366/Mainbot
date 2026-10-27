@@ -149,7 +149,7 @@ function getOpenTasks(guildId) {
 }
 
 // =====================================================
-// 🎨 EMBED & BUTTONS (Vexo RP-Design)
+// 🎨 EMBED & BUTTONS (NoVex RP-Design)
 // =====================================================
 
 function buildTaskEmbed(task) {
@@ -175,7 +175,7 @@ function buildTaskEmbed(task) {
         .setTitle("👨‍💻 Neue Dev-Aufgabe")
         .setDescription(lines.join("\n"))
         .setColor(STATUS_COLORS[task.status])
-        .setFooter({ text: `Vexo RP • Dev-Aufgaben-System ✧ Aufgabe #${task.id}` })
+        .setFooter({ text: `NoVex RP • Dev-Aufgaben-System ✧ Aufgabe #${task.id}` })
         .setTimestamp(new Date(task.createdAt));
 }
 
@@ -206,7 +206,7 @@ function buildPanelEmbed() {
             "Klicke auf den Button unten und sende deine Dev-Aufgabe direkt an das Entwicklerteam."
         )
         .setColor(0x5865F2)
-        .setFooter({ text: "Vexo RP • Dev-Aufgaben-System" });
+        .setFooter({ text: "NoVex RP • Dev-Aufgaben-System" });
 }
 
 function buildPanelButtons() {
@@ -374,7 +374,7 @@ function initializeDevTaskSystem(client, options = {}) {
                     .setTitle("⚙️ Dev-Aufgaben-Kanal festgelegt")
                     .setDescription(`Ab sofort werden alle neuen Dev-Aufgaben in ${message.channel} veröffentlicht.`)
                     .setColor(0x5865F2)
-                    .setFooter({ text: "Vexo RP • Dev-Aufgaben-System" });
+                    .setFooter({ text: "NoVex RP • Dev-Aufgaben-System" });
 
                 return message.channel.send({ embeds: [embed] });
             }

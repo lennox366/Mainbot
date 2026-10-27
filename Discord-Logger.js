@@ -14,7 +14,7 @@ const {
 // =====================================================
 
 const CONFIG = {
-    logChannelId: "1562485006226559038",
+    logChannelId: "1563981252565147880",
     footer: "Vexo RP • Discord Logging",
     queueDelay: 600,
     maxQueue: 500,

@@ -1,2127 +1,316 @@
-
-"use strict";
-
-const fs = require("fs");
-const path = require("path");
-
-const {
-    EmbedBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    StringSelectMenuBuilder,
-    ChannelType,
-    PermissionFlagsBits,
-    AttachmentBuilder,
-    ModalBuilder,
-    TextInputBuilder,
-    TextInputStyle
-} = require("discord.js");
-
-// =====================================================
-// VEXO RP TICKET SYSTEM
-// discord.js v14
-// =====================================================
-
-const SERVER_NAME = "💫 𝐕𝐞𝐱𝐨 𝐑𝐏 ┃ 𝐕𝟏";
-const COLOR = 0x9B59B6;
-const TIMEZONE = "Europe/Berlin";
-
-const CONFIG_FILE = path.join(
-    __dirname,
-    "Ticket-System.json"
-);
-
-const DATA_FILE = path.join(
-    __dirname,
-    "Ticket-Daten.json"
-);
-
-
-const BOT_OWNER_USER_IDS = [
-    "1322191083303731201"
-];
-
-
-const REMINDER_INTERVAL = 5 * 60 * 60 * 1000;
-const TICKET_MAX_AGE = 48 * 60 * 60 * 1000;
-const REMINDER_CHECK_INTERVAL = 5 * 60 * 1000;
-const FEEDBACK_FILE = path.join(__dirname, "Ticket-Feedback.json");
-
-// =====================================================
-// DISCORD-KATEGORIEN
-// =====================================================
-
-const DISCORD_CATEGORIES = {
-    allgemeinerSupport: "1559659275163275335",
-    teambeschwerden: "1559659275163275336",
-    highteamFragen: "1559659275163275337",
-    fehlerReport: "1559659275163275338",
-    entbannungsantrag: "1559659275163275339",
-    leitungsFragen: "1559659275163275340",
-    muendlicheBewerbung: "1559659275163275341",
-    bauGenehmigungen: "1559659275163275342",
-    fraktionenWaffenscheine: "1559659275163275343"
+ "use strict";
+const fs=require("fs"),path=require("path");
+const {EmbedBuilder,ActionRowBuilder,ButtonBuilder,ButtonStyle,StringSelectMenuBuilder,ChannelType,PermissionFlagsBits,AttachmentBuilder,ModalBuilder,TextInputBuilder,TextInputStyle,SlashCommandBuilder}=require("discord.js");
+const SERVER_NAME="💫 NOVEX RP",TIMEZONE="Europe/Berlin",COLOR=0x8052ff;
+const CONFIG_FILE=path.join(__dirname,"Ticket-System.json"),DATA_FILE=path.join(__dirname,"Ticket-Daten.json"),FEEDBACK_FILE=path.join(__dirname,"Ticket-Feedback.json");
+const BOT_OWNER_USER_IDS=["1322191083303731201"];
+const REMINDER_INTERVAL=5*60*60*1000,TICKET_MAX_AGE=48*60*60*1000,REMINDER_CHECK_INTERVAL=5*60*1000;
+const DISCORD_CATEGORIES={
+ allgemeinerSupport:"1564307538881675355",teambeschwerden:"1564307542127935623",
+ highteamFragen:"1564307547358498877",entbannungsantrag:"1564307540089765942",
+ leitungsFragen:"1564307546129301617",muendlicheBewerbung:"1564307552194535605",
+ bauGenehmigungen:"1564307549816098916",fraktionenWaffenscheine:"1564307543315058821",
+ partner:"1564307548490829935",immobilien:"1564307549816098916",waffenschein:"1564307544917151785",
+ contentcreator:"1564307546129301617",coowner:"1564323457209204848"
 };
-
-// =====================================================
-// DISCORD-ROLLEN
-// =====================================================
 
 const ROLES = {
-    // Globale Leitung / Ausnahmen
-    serverbesitzer: "1559659267441819694",
-    founder: "1559659267441819689",
-    mitgruender: "1559659267349553270",
-    owner: "1559659267408134201",
-    coowner: "1559659267408134200",
-    developer: "1559659267395428541",
-    stvDeveloper: "1561119043983773696",
+  founder: "1564307136069111848",
+  owner: "1564307142893240490",
+  coowner: "1564307143962923108",
+  ownerAssistent: "1564307145359368355",
+  discordLeitung: "1564307160618377257",
+  developer: "1564307163092881489",
 
-    // Projektleitung
-    leitendeProjektleitung: "1559659267395428537",
-    projektleitung: "1559659267395428536",
-    stvProjektleitung: "1559659267395428535",
+  leitendeProjektleitung: "1564307167144575087",
+  projektleitung: "1564307168063131679",
+  stvProjektleitung: "1564307169946509313",
+  highTeamAusbilder: "1564307172261629972",
 
-    // Management
-    leitenderManager: "1559659267349553269",
-    manager: "1559659267349553268",
-    stvManager: "1559659267349553267",
+  hauptleitung: "1564307175634112634",
+  stvHauptleitung: "1564307176938541236",
+  gesamtleitung: "1564307181023527152",
+  stvGesamtleitung: "1564307181803671673",
 
-    // Supervisor
-    leitenderSupervisor: "1559659267349553264",
-    supervisor: "1559659267349553263",
-    stvSupervisor: "1559659267324256375",
+  highteamleitung: "1564307185469497504",
+  stvHighteamleitung: "1564307186450960465",
+  serverleitung: "1564307189072535583",
+  stvServerleitung: "1564307191475736638",
 
-    // Teamleitung
-    leitendeTeamleitung: "1559659267324256370",
-    teamleitung: "1559659267324256369",
-    stvTeamleitung: "1559659267324256368",
+  projektDirektor: "1564307194822795295",
+  direktor: "1564307196181881032",
+  stvDirektor: "1564307197893017652",
 
-    // Administration
-    headAdmin: "1559659267299217466",
-    seniorAdmin: "1559659267299217465",
-    admin: "1559659267299217464",
-    juniorAdmin: "1559659267299217463",
+  leitenderManager: "1564307205417730050",
+  manager: "1564307206655049969",
+  stvManager: "1564307210455224485",
 
-    // Moderation
-    headMod: "1559659267299217461",
-    seniorMod: "1559659267299217460",
-    mod: "1559659267299217459",
-    juniorMod: "1559659267269595155",
+  leitendeTeamleitung: "1564307216331448437",
+  teamleitung: "1564307216947744802",
+  stvTeamleitung: "1564307218541711472",
 
-    // Support
-    headSup: "1559659267269595153",
-    seniorSup: "1559659267269595152",
-    sup: "1559659267269595151",
-    testSup: "1559659267269595150",
+  regelverwaltung: "1564307223549579417",
+  stvRegelverwaltung: "1564307224959000607",
 
-    // Fraktionsverwaltung
-    fraktionsverwaltung: "1559659267307339842",
-    stvFraktionsverwaltung: "1559659267307339841"
+  adminLeitung: "1564307228079431941",
+  modLeitung: "1564307229262221413",
+  supportleitung: "1564307231955226767",
+  stvSupportleitung: "1564307233511313499",
+
+  highTeam: "1564307235457470674",
+  highteamAnwaerter: "1564307237697101894",
+
+  eventLeitung: "1564307238535831684",
+  stvEventLeitung: "1564307241119645697",
+
+  fraktionsverwaltung: "1564307243829043300",
+  stvFraktionsverwaltung: "1564307245406097508",
+  ausbilder: "1564307248027537429",
+
+  seniorAdmin: "1564307253429932163",
+  admin: "1564307254801469572",
+  juniorAdmin: "1564307256257024102",
+  testAdmin: "1564307257464725664",
+
+  seniorMod: "1564307262690828394",
+  mod: "1564307263634669732",
+  juniorMod: "1564307265350140026",
+  testMod: "1564307266805698721",
+
+  seniorSup: "1564307270270058648",
+  sup: "1564307271759171684",
+  juniorSup: "1564307272476135536",
+  testSup: "1564307283704545320",
+
+  serverTeam: "1564307288053784706"
 };
-
-// =====================================================
-// ROLLENGRUPPEN
-// =====================================================
-
-const ROLE_GROUPS = {
-    support: [
-        ROLES.headSup,
-        ROLES.seniorSup,
-        ROLES.sup,
-        ROLES.testSup
-    ],
-
-    moderation: [
-        ROLES.headMod,
-        ROLES.seniorMod,
-        ROLES.mod,
-        ROLES.juniorMod
-    ],
-
-    administration: [
-        ROLES.headAdmin,
-        ROLES.seniorAdmin,
-        ROLES.admin,
-        ROLES.juniorAdmin
-    ],
-
-    management: [
-        ROLES.leitenderManager,
-        ROLES.manager,
-        ROLES.stvManager
-    ],
-
-    supervisor: [
-        ROLES.leitenderSupervisor,
-        ROLES.supervisor,
-        ROLES.stvSupervisor
-    ],
-
-    teamleitung: [
-        ROLES.leitendeTeamleitung,
-        ROLES.teamleitung,
-        ROLES.stvTeamleitung
-    ],
-
-    projektleitung: [
-        ROLES.leitendeProjektleitung,
-        ROLES.projektleitung,
-        ROLES.stvProjektleitung
-    ],
-
-    serverleitung: [
-        ROLES.serverbesitzer,
-        ROLES.founder,
-        ROLES.mitgruender,
-        ROLES.owner,
-        ROLES.coowner
-    ],
-
-    fraktionsverwaltung: [
-        ROLES.fraktionsverwaltung,
-        ROLES.stvFraktionsverwaltung
-    ]
+  
+const ids=(...keys)=>keys.map(k=>ROLES[k]).filter(Boolean);
+const ROLE_GROUPS={
+ support:ids("supportleitung","stvSupportleitung","seniorSup","sup","juniorSup","testSup"),
+ moderation:ids("modLeitung","seniorMod","mod","juniorMod","testMod"),
+ administration:ids("adminLeitung","seniorAdmin","admin","juniorAdmin","testAdmin"),
+ management:ids("leitenderManager","manager","stvManager"),
+ teamleitung:ids("leitendeTeamleitung","teamleitung","stvTeamleitung"),
+ projektleitung:ids("leitendeProjektleitung","projektleitung","stvProjektleitung"),
+ serverleitung:ids("founder","owner","coowner","ownerAssistent","hauptleitung","stvHauptleitung","gesamtleitung","stvGesamtleitung","serverleitung","stvServerleitung"),
+ fraktionsverwaltung:ids("fraktionsverwaltung","stvFraktionsverwaltung"),
+ event:ids("eventLeitung","stvEventLeitung")
 };
-
-ROLE_GROUPS.highteam = [
-    ...ROLE_GROUPS.teamleitung,
-    ...ROLE_GROUPS.supervisor,
-    ...ROLE_GROUPS.management,
-    ...ROLE_GROUPS.projektleitung,
-    ...ROLE_GROUPS.serverleitung
+ROLE_GROUPS.highteam=[...ids("highTeam","highteamleitung","stvHighteamleitung"),...ROLE_GROUPS.teamleitung,...ROLE_GROUPS.management,...ROLE_GROUPS.projektleitung,...ROLE_GROUPS.serverleitung];
+ROLE_GROUPS.leitungsebene=[...ids("projektDirektor","direktor","stvDirektor"),...ROLE_GROUPS.highteam];
+ROLE_GROUPS.staff=[...ROLE_GROUPS.support,...ROLE_GROUPS.moderation,...ROLE_GROUPS.administration];
+const GLOBAL_ACCESS_ROLES=ids("founder","owner","coowner","ownerAssistent","discordLeitung","developer");
+const TICKET_TYPES=[
+ {id:"fragen",label:"Fragen",emoji:"❓",description:"Allgemeine Fragen",categoryId:DISCORD_CATEGORIES.allgemeinerSupport,roleIds:[...ROLE_GROUPS.staff]},
+ {id:"entbannung",label:"Entbannung",emoji:"🔓",description:"Antrag auf Entbannung",categoryId:DISCORD_CATEGORIES.entbannungsantrag,roleIds:[...ROLE_GROUPS.moderation,...ROLE_GROUPS.administration,...ROLE_GROUPS.event,ROLES.ausbilder]},
+ {id:"anliegen",label:"Anliegen",emoji:"📝",description:"Allgemeine Anliegen",categoryId:DISCORD_CATEGORIES.allgemeinerSupport,roleIds:[ROLES.highTeam,...ROLE_GROUPS.teamleitung,...ROLE_GROUPS.management]},
+ {id:"partner",label:"Partner Ticket",emoji:"🤝",description:"Partnerschaftsanfragen",categoryId:DISCORD_CATEGORIES.partner,roleIds:[...ROLE_GROUPS.management,ROLES.highTeam]},
+ {id:"fraktion",label:"Fraktion",emoji:"🏢",description:"Fraktionsanliegen",categoryId:DISCORD_CATEGORIES.fraktionenWaffenscheine,roleIds:[...ROLE_GROUPS.fraktionsverwaltung]},
+ {id:"immobilien",label:"Immobilien-Ticket",emoji:"🏠",description:"Immobilien, Häuser und Grundstücke",categoryId:DISCORD_CATEGORIES.immobilien,roleIds:[...ROLE_GROUPS.fraktionsverwaltung]},
+ {id:"waffenschein",label:"Waffenschein",emoji:"📋",description:"Waffenschein beantragen",categoryId:DISCORD_CATEGORIES.waffenschein,roleIds:[...ROLE_GROUPS.fraktionsverwaltung]},
+ {id:"contentcreator",label:"Content Creator",emoji:"🎨",description:"Content-Creator-Anfragen",categoryId:DISCORD_CATEGORIES.contentcreator,roleIds:[ROLES.hauptleitung,ROLES.direktor,ROLES.highTeamAusbilder,...ROLE_GROUPS.projektleitung]},
+ {id:"serverwechsel",label:"Server Wechsel",emoji:"🔄",description:"Anfrage zum Serverwechsel",categoryId:DISCORD_CATEGORIES.leitungsFragen,roleIds:[...ROLE_GROUPS.projektleitung,ROLES.owner,ROLES.coowner,ROLES.founder]},
+ {id:"beschwerde",label:"Generelle Beschwerden",emoji:"⚠️",description:"Allgemeine Beschwerden",categoryId:DISCORD_CATEGORIES.teambeschwerden,roleIds:[ROLES.highTeam,...ROLE_GROUPS.teamleitung,...ROLE_GROUPS.management,ROLES.hauptleitung,ROLES.direktor,ROLES.highTeamAusbilder]},
+ {id:"teambeschwerde",label:"Team Beschwerde",emoji:"📢",description:"Beschwerde über Teammitglieder",categoryId:DISCORD_CATEGORIES.teambeschwerden,roleIds:[ROLES.highTeam,...ROLE_GROUPS.management,ROLES.direktor]},
+ {id:"coowner",label:"Co-Owner / Owner",emoji:"🏛️",description:"Kontakt zu Owner und Co.Owner",categoryId:DISCORD_CATEGORIES.coowner,roleIds:ids("owner","coowner")},
+ {id:"intern",label:"Intern",emoji:"🔒",description:"Interne Angelegenheiten",categoryId:DISCORD_CATEGORIES.highteamFragen,roleIds:[...ROLE_GROUPS.projektleitung,ROLES.owner,ROLES.coowner,ROLES.founder]},
+ {id:"highteam",label:"High Team",emoji:"👑",description:"Kontakt zum High Team",categoryId:DISCORD_CATEGORIES.highteamFragen,roleIds:ids("highTeam","highteamleitung","stvHighteamleitung")}
 ];
-
-ROLE_GROUPS.leitungsebene = [
-    ...ROLE_GROUPS.highteam
+function readJSON(file,fallback){try{return fs.existsSync(file)?JSON.parse(fs.readFileSync(file,"utf8")):fallback;}catch(e){console.error("[TICKET] JSON lesen:",e);return fallback;}}
+function writeJSON(file,data){try{const tmp=file+".tmp";fs.writeFileSync(tmp,JSON.stringify(data,null,2));fs.renameSync(tmp,file);return true;}catch(e){console.error("[TICKET] JSON speichern:",e);return false;}}
+function loadData(){const d=readJSON(DATA_FILE,{tickets:{}});d.tickets ||= {};return d;}
+const saveData=write=>writeJSON(DATA_FILE,write);
+function getGuildConfig(id){const d=readJSON(CONFIG_FILE,{guilds:{}});return {logChannelId:null,feedbackChannelId:null,nightLock:true,name:SERVER_NAME,...(d.guilds?.[id]||{})};}
+function saveGuildConfig(id,c){const d=readJSON(CONFIG_FILE,{guilds:{}});d.guilds ||= {};d.guilds[id]=c;return writeJSON(CONFIG_FILE,d);}
+function getBerlinHour(){return Number(new Intl.DateTimeFormat("en-GB",{timeZone:TIMEZONE,hour:"numeric",hourCycle:"h23"}).format(new Date()));}
+function isNightLock(c){return c.nightLock!==false&&getBerlinHour()<8;}
+const getTicketType=id=>TICKET_TYPES.find(t=>t.id===id);
+const uniqueIds=a=>[...new Set(a.filter(Boolean))];
+const getTicketRoleIds=(g,id)=>uniqueIds(getTicketType(id)?.roleIds||[]).filter(x=>g.roles.cache.has(x));
+const getGlobalRoleIds=g=>GLOBAL_ACCESS_ROLES.filter(x=>g.roles.cache.has(x));
+function isGlobalStaff(m){return !!m&&(m.id===m.guild.ownerId||BOT_OWNER_USER_IDS.includes(m.id)||GLOBAL_ACCESS_ROLES.some(x=>m.roles.cache.has(x)));}
+function isStaff(m,id){return !!m&&(isGlobalStaff(m)||(getTicketType(id)?.roleIds||[]).some(x=>m.roles.cache.has(x)));}
+const getDisplayName=m=>m.displayName||m.user?.globalName||m.user?.username||"Unbekannt";
+function buildPanel(g,c){
+ const e=new EmbedBuilder().setColor(COLOR).setTitle("💫 NOVEX RP • SUPPORT HUB").setDescription(["**Willkommen beim NOVEX-RP-Support!**","","Du benötigst Hilfe oder möchtest ein vertrauliches Anliegen klären?","Drücke **Support anfragen** und wähle eine Ticketart.","","🔐 Private Tickets mit zuständigen Teamrollen.",c.nightLock!==false?"🌙 Ticketzeiten: 08:00–00:00 Uhr":"🟢 Tickets rund um die Uhr"].join("\n")).setFooter({text:`${c.name||SERVER_NAME} • Support`}).setTimestamp();
+ return {embeds:[e],components:[new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId("ticket_open").setLabel("Support anfragen").setEmoji("💌").setStyle(ButtonStyle.Primary))]};
+}
+function buildTicketSelect(){
+ const select=new StringSelectMenuBuilder().setCustomId("ticket_select").setPlaceholder("📂 Ticket-Kategorie wählen").addOptions(TICKET_TYPES.map(t=>({label:t.label,value:t.id,description:t.description,emoji:t.emoji})));
+ return {embeds:[new EmbedBuilder().setColor(COLOR).setTitle("🎫 Ticketart auswählen").setDescription("Wähle dein Anliegen aus.")],components:[new ActionRowBuilder().addComponents(select),new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId("ticket_cancel").setLabel("Abbrechen").setStyle(ButtonStyle.Secondary))],flags:64};
+}
+function ticketButtons(claimed=false){return new ActionRowBuilder().addComponents(
+ new ButtonBuilder().setCustomId("ticket_claim").setLabel("Übernehmen").setEmoji("🙋").setStyle(ButtonStyle.Success).setDisabled(claimed),
+ new ButtonBuilder().setCustomId("ticket_release").setLabel("Freigeben").setEmoji("🔓").setStyle(ButtonStyle.Secondary).setDisabled(!claimed),
+ new ButtonBuilder().setCustomId("ticket_close").setLabel("Schließen").setEmoji("🔒").setStyle(ButtonStyle.Danger));}
+function describeFailure(r){return {night:"🌙 Zwischen 00:00 und 08:00 Uhr können keine Tickets erstellt werden.",exists:`📌 Du hast bereits ein offenes Ticket: <#${r?.channelId}>`,nosetup:"⚠️ Die Discord-Kategorie konnte nicht gefunden werden.",permission:"❌ Bot-Berechtigungen fehlen."}[r?.reason]||"❌ Ticket konnte nicht erstellt werden.";}
+async function findOpenTicket(g,userId){
+ const d=loadData();let changed=false;
+ for(const [id,t] of Object.entries(d.tickets)){if(t.guildId!==g.id||t.userId!==userId)continue;
+ const ch=await g.channels.fetch(id).catch(()=>null);if(ch)return id;delete d.tickets[id];changed=true;}
+ if(changed)saveData(d);return null;
+}
+async function sendLog(g,c,e,files=[]){if(!c.logChannelId)return;const ch=await g.channels.fetch(c.logChannelId).catch(()=>null);if(ch?.isTextBased())await ch.send({embeds:[e],files,allowedMentions:{parse:[]}}).catch(err=>console.error("[TICKET] Log:",err));}
+function channelName(type,member){
+ // Emoji + Ticketart + Benutzername; Discord begrenzt Kanalnamen auf 100 Zeichen.
+ const label=type.label.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+ const user=member.user.username.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9_-]+/g,"-").replace(/^-|-$/g,"").slice(0,28)||member.id;
+ return `${type.emoji}・${label}・${user}`.slice(0,95);
+}
+async function createTicket(g,m,typeId,options={}){
+ try{
+  const type=getTicketType(typeId);if(!type)return {ok:false,reason:"error"};
+  const config=getGuildConfig(g.id);if(isNightLock(config))return {ok:false,reason:"night"};
+  const existing=await findOpenTicket(g,m.id);if(existing)return {ok:false,reason:"exists",channelId:existing};
+  const parent=await g.channels.fetch(type.categoryId).catch(()=>null);
+  if(parent?.type!==ChannelType.GuildCategory)return {ok:false,reason:"nosetup"};
+  const staff=getTicketRoleIds(g,type.id),allRoles=uniqueIds([...staff,...getGlobalRoleIds(g)]);
+  const allow=[PermissionFlagsBits.ViewChannel,PermissionFlagsBits.SendMessages,PermissionFlagsBits.ReadMessageHistory,PermissionFlagsBits.AttachFiles];
+  const overwrites=[{id:g.id,deny:[PermissionFlagsBits.ViewChannel]},{id:m.id,allow},{id:g.client.user.id,allow:[...allow,PermissionFlagsBits.ManageChannels]},...allRoles.map(id=>({id,allow}))];
+  for(const id of BOT_OWNER_USER_IDS){if(id!==m.id&&id!==g.client.user.id&&await g.members.fetch(id).catch(()=>null))overwrites.push({id,allow});}
+  const ch=await g.channels.create({name:channelName(type,m),type:ChannelType.GuildText,parent:parent.id,topic:`NOVEX ticket | ${m.id} | ${type.id}`,permissionOverwrites:overwrites});
+  const d=loadData();d.tickets[ch.id]={guildId:g.id,userId:m.id,type:type.id,categoryId:parent.id,createdAt:Date.now(),claimedBy:null,lastReminder:null,source:options.source||"panel"};
+  if(!saveData(d)){await ch.delete().catch(()=>{});return {ok:false,reason:"error"};}
+  const e=new EmbedBuilder().setColor(COLOR).setTitle(`${type.emoji} ${type.label}`).setDescription(`Hallo **${getDisplayName(m)}**!\n\n📝 Beschreibe bitte dein Anliegen.\n🔔 Das zuständige Team wurde benachrichtigt.\n⏳ Ein Teammitglied meldet sich bald.`).addFields({name:"👤 Ersteller",value:getDisplayName(m),inline:true},{name:"📂 Kategorie",value:type.label,inline:true},{name:"📌 Status",value:"🟡 Offen",inline:true}).setFooter({text:`${SERVER_NAME} • Support`}).setTimestamp();
+  if(options.question)e.addFields({name:"❓ Frage",value:String(options.question).slice(0,1000)});
+  await ch.send({content:staff.map(id=>`<@&${id}>`).join(" ")||"🎫 Neues Ticket",embeds:[e],components:[ticketButtons()],allowedMentions:{parse:[],roles:staff,users:[]}});
+  await sendLog(g,config,new EmbedBuilder().setColor(0x57f287).setTitle("🎫 Ticket erstellt").addFields({name:"Ersteller",value:`<@${m.id}>`},{name:"Ticketart",value:type.label},{name:"Kanal",value:`<#${ch.id}>`}).setTimestamp());
+  return {ok:true,channel:ch};
+ }catch(e){console.error("[TICKET] Erstellen:",e);return {ok:false,reason:"error"};}
+}
+async function buildTranscript(ch){
+ const messages=[];let before;
+ for(let i=0;i<10;i++){const batch=await ch.messages.fetch({limit:100,...(before?{before}:{})});if(!batch.size)break;messages.push(...batch.values());before=batch.last().id;if(batch.size<100)break;}
+ messages.sort((a,b)=>a.createdTimestamp-b.createdTimestamp);
+ return messages.map(m=>`[${new Date(m.createdTimestamp).toLocaleString("de-DE",{timeZone:TIMEZONE})}] ${m.author?.username||"Unbekannt"}: ${m.content||"[Embed/Datei]"} ${[...m.attachments.values()].map(a=>a.url).join(", ")}`).join("\n");
+}
+const closingTickets=new Set();
+async function closeTicketWithFeedback(ch,t,reason,closedBy){
+ if(!ch||closingTickets.has(ch.id))return false;closingTickets.add(ch.id);
+ try{
+  const config=getGuildConfig(ch.guild.id),typeName=getTicketType(t.type)?.label||t.type;
+  const feedback=readJSON(FEEDBACK_FILE,{entries:{},owners:{},tickets:{}});
+  feedback.entries ||= {};feedback.owners ||= {};feedback.tickets ||= {};
+  feedback.owners[ch.id]=t.userId;feedback.tickets[ch.id]={guildId:ch.guild.id,type:typeName,claimedBy:t.claimedBy||null,closedBy:String(closedBy),closedAt:Date.now()};
+  writeJSON(FEEDBACK_FILE,feedback);
+  const user=await ch.client.users.fetch(t.userId).catch(()=>null);
+  if(user){
+   const row=new ActionRowBuilder().addComponents(...[1,2,3,4,5].map(n=>new ButtonBuilder().setCustomId(`ticket_feedback_star_${n}_${ch.id}`).setLabel("⭐".repeat(n)).setStyle(ButtonStyle.Primary)));
+   await user.send({embeds:[new EmbedBuilder().setColor(0x0893f3).setTitle("💙 NOVEX RP • Support-Bewertung").setDescription("🔒 Dein Ticket wurde geschlossen.\n\nWie zufrieden warst du mit unserem Support? Wähle 1–5 Sterne und gib deinen Grund an.").addFields({name:"🎫 Ticketart",value:typeName},{name:"👨‍💻 Bearbeitet von",value:t.claimedBy?`<@${t.claimedBy}>`:"Nicht übernommen"}).setTimestamp()],components:[row],allowedMentions:{parse:[]}}).catch(()=>{});
+  }
+  const log=new EmbedBuilder().setColor(0xed4245).setTitle("🔒 Ticket geschlossen").addFields({name:"Ersteller",value:`<@${t.userId}>`},{name:"Ticketart",value:typeName},{name:"Geschlossen von",value:String(closedBy).slice(0,1024)},{name:"Grund",value:String(reason).slice(0,1024)}).setTimestamp();
+  if(config.logChannelId){try{const transcript=await buildTranscript(ch);await sendLog(ch.guild,config,log,[new AttachmentBuilder(Buffer.from(transcript||"Keine Nachrichten","utf8"),{name:`transcript-${ch.id}.txt`})]);}catch(e){console.error("[TICKET] Transcript:",e);await sendLog(ch.guild,config,log);}}
+  const d=loadData();delete d.tickets[ch.id];if(!saveData(d))return false;
+  await ch.send({embeds:[new EmbedBuilder().setColor(0xed4245).setTitle("🔒 Ticket geschlossen").setDescription(`${reason}\n\nDer Kanal wird in 5 Sekunden gelöscht.`)]}).catch(()=>{});
+  setTimeout(()=>ch.delete(reason).catch(console.error),5000);return true;
+ }finally{closingTickets.delete(ch.id);}
+}
+async function handleTicketFeedback(i){
+ if(!i.isButton()&&!i.isModalSubmit())return;
+ const b=/^ticket_feedback_star_([1-5])_(\d+)$/.exec(i.customId||""),m=/^ticket_feedback_modal_([1-5])_(\d+)$/.exec(i.customId||"");
+ if(!b&&!m)return;const [,stars,chId]=b||m,rate=Number(stars),f=readJSON(FEEDBACK_FILE,{entries:{},owners:{},tickets:{}});f.entries ||= {};f.owners ||= {};f.tickets ||= {};
+ const key=`${chId}:${i.user.id}`;
+ if(f.owners[chId]!==i.user.id)return i.reply({content:"🔒 Nicht deine Bewertung.",flags:64});
+ if(f.entries[key])return i.reply({content:"ℹ️ Bereits bewertet.",flags:64});
+ if(b){const modal=new ModalBuilder().setCustomId(`ticket_feedback_modal_${rate}_${chId}`).setTitle("💙 NOVEX RP • Bewertung");modal.addComponents(new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("ticket_feedback_reason").setLabel("Grund für deine Bewertung").setStyle(TextInputStyle.Paragraph).setMinLength(2).setMaxLength(1000).setRequired(true)));return i.showModal(modal);}
+ await i.deferReply({flags:64});const reason=i.fields.getTextInputValue("ticket_feedback_reason").trim();if(reason.length<2)return i.editReply("❌ Bitte Grund angeben.");
+ const latest=readJSON(FEEDBACK_FILE,{entries:{},owners:{},tickets:{}});latest.entries ||= {};if(latest.entries[key])return i.editReply("ℹ️ Bereits bewertet.");
+ const info=latest.tickets?.[chId]||{};latest.entries[key]={ticketChannelId:chId,guildId:info.guildId||null,userId:i.user.id,stars:rate,reason,claimedBy:info.claimedBy||null,ratedAt:Date.now()};
+ if(!writeJSON(FEEDBACK_FILE,latest))return i.editReply("❌ Speichern fehlgeschlagen.");
+ const guild=info.guildId?await i.client.guilds.fetch(info.guildId).catch(()=>null):null;
+ if(guild){const c=getGuildConfig(guild.id);if(c.feedbackChannelId){const channel=await guild.channels.fetch(c.feedbackChannelId).catch(()=>null);if(channel?.isTextBased())await channel.send({embeds:[new EmbedBuilder().setColor(0x0893f3).setTitle("💙 NOVEX RP • Support-Bewertung").addFields({name:"👤 Von",value:`<@${i.user.id}>`},{name:"⭐ Sterne",value:`${"⭐".repeat(rate)} (${rate}/5)`},{name:"🛠️ Staff",value:info.claimedBy?`<@${info.claimedBy}>`:"Nicht übernommen"},{name:"📝 Grund",value:reason}).setTimestamp()],allowedMentions:{parse:[]}}).catch(console.error);}}
+ await i.editReply(`💙 Danke für dein Feedback! ${rate}/5 Sterne.`);
+ if(i.message?.editable)await i.message.edit({components:[]}).catch(()=>{});
+}
+async function handleTicketInteraction(i){
+ if(!i.guild||!i.customId?.startsWith("ticket_"))return;
+ try{
+  const id=i.customId,c=getGuildConfig(i.guild.id);
+  if(i.isButton()&&id==="ticket_immobilien_open"){await i.deferReply({flags:64});const m=await i.guild.members.fetch(i.user.id);const r=await createTicket(i.guild,m,"immobilien",{source:"immobilien-panel"});return i.editReply(r.ok?`✅ Dein Ticket: <#${r.channel.id}>`:describeFailure(r));}
+  if(i.isButton()&&id==="ticket_open"){if(isNightLock(c))return i.reply({content:describeFailure({reason:"night"}),flags:64});const old=await findOpenTicket(i.guild,i.user.id);if(old)return i.reply({content:describeFailure({reason:"exists",channelId:old}),flags:64});return i.reply(buildTicketSelect());}
+  if(i.isButton()&&id==="ticket_cancel")return i.update({content:"❌ Abgebrochen.",embeds:[],components:[]});
+  if(i.isStringSelectMenu()&&id==="ticket_select"){await i.deferUpdate();const m=await i.guild.members.fetch(i.user.id);const r=await createTicket(i.guild,m,i.values[0]);return i.editReply({content:r.ok?`✅ Ticket erstellt: <#${r.channel.id}>`:describeFailure(r),embeds:[],components:[]});}
+  if(!i.isButton()||!["ticket_claim","ticket_release","ticket_close"].includes(id))return;
+  const d=loadData(),t=d.tickets[i.channelId];if(!t)return i.reply({content:"❌ Kein aktives Ticket.",flags:64});
+  const m=await i.guild.members.fetch(i.user.id);if(!isStaff(m,t.type))return i.reply({content:"🔒 Nur zuständige Teammitglieder dürfen dieses Ticket bearbeiten.",flags:64});
+  if(id==="ticket_claim"){
+   if(t.claimedBy)return i.reply({content:"⚠️ Bereits übernommen.",flags:64});
+   t.claimedBy=i.user.id;if(!saveData(d))return i.reply({content:"❌ Speichern fehlgeschlagen.",flags:64});
+   await i.update({components:[ticketButtons(true)]});return i.channel.send({embeds:[new EmbedBuilder().setColor(0x57f287).setTitle("🙋 Ticket übernommen!").setDescription(`**${getDisplayName(m)}** kümmert sich jetzt um dein Anliegen.`).setTimestamp()]});
+  }
+  if(id==="ticket_release"){
+   if(!t.claimedBy)return i.reply({content:"⚠️ Noch nicht übernommen.",flags:64});
+   if(t.claimedBy!==i.user.id&&!isGlobalStaff(m))return i.reply({content:"🔒 Nur die übernehmende Person oder die Leitung darf freigeben.",flags:64});
+   t.claimedBy=null;t.lastReminder=Date.now();if(!saveData(d))return i.reply({content:"❌ Speichern fehlgeschlagen.",flags:64});
+   await i.update({components:[ticketButtons(false)]});return i.channel.send({embeds:[new EmbedBuilder().setColor(0xf1c40f).setTitle("🔓 Ticket freigegeben").setDescription(`**${getDisplayName(m)}** hat das Ticket wieder freigegeben.`)]});
+  }
+  await i.deferReply({flags:64});const ok=await closeTicketWithFeedback(i.channel,t,"Manuell durch das Support-Team geschlossen",getDisplayName(m));return i.editReply(ok?"✅ Ticket geschlossen; Feedback-DM wurde versucht.":"❌ Ticket konnte nicht geschlossen werden.");
+ }catch(e){console.error("[TICKET] Interaktion:",e);const payload={content:"❌ Fehler im Ticketsystem.",flags:64};if(i.deferred||i.replied)await i.followUp(payload).catch(()=>{});else await i.reply(payload).catch(()=>{});}
+}
+async function handleTicketSlashCommand(i){
+ if(!i.isChatInputCommand()||i.commandName!=="ticketsystem")return;
+ if(!i.guild||!i.channel?.isTextBased())return i.reply({content:"❌ Nur auf Servern.",flags:64});
+ if(!i.memberPermissions?.has(PermissionFlagsBits.ManageGuild))return i.reply({content:"🔒 Server verwalten erforderlich.",flags:64});
+ try{await i.deferReply({flags:64});await i.channel.send(buildPanel(i.guild,getGuildConfig(i.guild.id)));await i.editReply("✅ Ticketpanel erstellt!");}catch(e){console.error("[TICKET] Panel:",e);if(i.deferred)await i.editReply("❌ Panel konnte nicht erstellt werden.").catch(()=>{});}
+}
+async function handleImmobilienPanelSlashCommand(i){
+ if(!i.isChatInputCommand()||i.commandName!=="immobilienpanel")return;
+ if(!i.guild||!i.channel?.isTextBased())return i.reply({content:"❌ Nur auf Servern.",flags:64});
+ if(!i.memberPermissions?.has(PermissionFlagsBits.ManageGuild))return i.reply({content:"🔒 Server verwalten erforderlich.",flags:64});
+ try{await i.deferReply({flags:64});await i.channel.send({embeds:[new EmbedBuilder().setColor(0x0893f3).setTitle("🏠 NOVEX RP • Immobilien-Service").setDescription("Klicke auf den Button für ein privates Immobilien-Ticket.")],components:[new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId("ticket_immobilien_open").setLabel("Immobilien-Ticket erstellen").setEmoji("🏠").setStyle(ButtonStyle.Primary))]});await i.editReply("✅ Immobilien-Panel erstellt.");}catch(e){console.error(e);if(i.deferred)await i.editReply("❌ Fehler.").catch(()=>{});}
+}
+async function handleTicketSetupSlashCommand(i){
+ if(!i.isChatInputCommand()||i.commandName!=="ticketsetup")return;
+ if(!i.guild||!i.memberPermissions?.has(PermissionFlagsBits.ManageGuild))return i.reply({content:"🔒 Server verwalten erforderlich.",flags:64});
+ try{await i.deferReply({flags:64});const sub=i.options.getSubcommand(),c=getGuildConfig(i.guild.id);
+ if(sub==="log"||sub==="bewertungen"){const ch=i.options.getChannel("kanal",true);if(!ch.isTextBased()||ch.isDMBased())return i.editReply("❌ Server-Textkanal wählen.");if(sub==="log")c.logChannelId=ch.id;else c.feedbackChannelId=ch.id;}
+ else if(sub==="nachtsperre")c.nightLock=i.options.getString("status",true)==="an";
+ else if(sub==="name")c.name=i.options.getString("text",true);
+ else if(sub==="status")return i.editReply(`**🎫 NOVEX RP Ticketsystem**\n📂 Ticketarten: ${TICKET_TYPES.length}\n📋 Logs: ${c.logChannelId?`<#${c.logChannelId}>`:"Nicht gesetzt"}\n⭐ Bewertungen: ${c.feedbackChannelId?`<#${c.feedbackChannelId}>`:"Nicht gesetzt"}\n🌙 Nachtsperre: ${c.nightLock?"An":"Aus"}`);
+ else return i.editReply("❌ Unbekannter Befehl.");
+ return i.editReply(saveGuildConfig(i.guild.id,c)?"✅ Einstellung gespeichert.":"❌ Speichern fehlgeschlagen.");
+ }catch(e){console.error("[TICKET] Setup:",e);if(i.deferred)await i.editReply("❌ Fehler.").catch(()=>{});}
+}
+async function runReminders(client){
+ const d=loadData(),now=Date.now();let changed=false;
+ for(const [id,t] of Object.entries(d.tickets)){
+  if(closingTickets.has(id))continue;
+  const ch=await client.channels.fetch(id).catch(()=>null);
+  if(!ch?.isTextBased()||!ch.guild){delete d.tickets[id];changed=true;continue;}
+  if(now-t.createdAt>=TICKET_MAX_AGE){if(await closeTicketWithFeedback(ch,t,"Automatisch nach 48 Stunden geschlossen","Automatisches Ticketsystem")){delete d.tickets[id];changed=true;}continue;}
+  if(now-(t.lastReminder||t.createdAt)<REMINDER_INTERVAL)continue;
+  try{
+   if(t.claimedBy)await ch.send({content:`⏰ Ticket-Erinnerung: Zuständig <@${t.claimedBy}> · Ersteller <@${t.userId}>`,allowedMentions:{parse:[],users:[t.claimedBy,t.userId]}});
+   else{const roles=getTicketRoleIds(ch.guild,t.type);await ch.send({content:`⏰ Dieses Ticket wartet auf Übernahme.\n👤 <@${t.userId}>\n📢 ${roles.map(r=>`<@&${r}>`).join(" ")||"Zuständiges Team"}`,allowedMentions:{parse:[],users:[t.userId],roles}});}
+   t.lastReminder=now;changed=true;
+  }catch(e){console.error("[TICKET] Erinnerung:",e);}
+ }
+ if(changed)saveData(d);
+}
+const slashCommands=[
+ new SlashCommandBuilder().setName("ticketsystem").setDescription("NOVEX RP Ticketpanel erstellen").setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+ new SlashCommandBuilder().setName("immobilienpanel").setDescription("NOVEX RP Immobilienpanel erstellen").setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
+ new SlashCommandBuilder().setName("ticketsetup").setDescription("NOVEX RP Ticketsystem konfigurieren").setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+ .addSubcommand(s=>s.setName("log").setDescription("Ticket-Logkanal").addChannelOption(o=>o.setName("kanal").setDescription("Textkanal").addChannelTypes(ChannelType.GuildText).setRequired(true)))
+ .addSubcommand(s=>s.setName("bewertungen").setDescription("Bewertungskanal").addChannelOption(o=>o.setName("kanal").setDescription("Textkanal").addChannelTypes(ChannelType.GuildText).setRequired(true)))
+ .addSubcommand(s=>s.setName("nachtsperre").setDescription("Nachtsperre").addStringOption(o=>o.setName("status").setDescription("Status").setRequired(true).addChoices({name:"An",value:"an"},{name:"Aus",value:"aus"})))
+ .addSubcommand(s=>s.setName("name").setDescription("Panelname").addStringOption(o=>o.setName("text").setDescription("Name").setRequired(true)))
+ .addSubcommand(s=>s.setName("status").setDescription("Aktuelle Konfiguration"))
 ];
-
-ROLE_GROUPS.staff = [
-    ...ROLE_GROUPS.support,
-    ...ROLE_GROUPS.moderation,
-    ...ROLE_GROUPS.administration
-];
-
-// Rollen, die ALLE Tickets bearbeiten dürfen.
-const GLOBAL_ACCESS_ROLES = [
-    ROLES.serverbesitzer,
-    ROLES.founder,
-    ROLES.mitgruender,
-    ROLES.owner,
-    ROLES.coowner,
-    ROLES.developer,
-    ROLES.stvDeveloper
-];
-
-// =====================================================
-// 13 TICKET-ARTEN
-// =====================================================
-
-const TICKET_TYPES = [
-    {
-        id: "fragen",
-        label: "Fragen",
-        emoji: "❓",
-        description: "Allgemeine Fragen",
-        categoryId: DISCORD_CATEGORIES.allgemeinerSupport,
-        roleIds: [
-            "1559659267269595149", // Supporter
-            "1559659267269595154", // Moderator
-            "1559659267299217462", // Administrator
-            "1559659267299217467", // Eventleitung
-            "1559659267307339839"  // Fraktionsverwaltung
-        ]
-    },
-    {
-        id: "entbannung",
-        label: "Entbannung",
-        emoji: "🔓",
-        description: "Antrag auf Entbannung",
-        categoryId: DISCORD_CATEGORIES.entbannungsantrag,
-        roleIds: [
-            "1559659267269595154", // Moderator
-            "1559659267299217462", // Administrator
-            "1559659267299217467", // Eventleitung
-            "1559659267307339839", // Fraktionsverwaltung
-            "1559659267307339843"  // Low-Ausbilder
-        ]
-    },
-    {
-        id: "anliegen",
-        label: "Anliegen",
-        emoji: "📝",
-        description: "Allgemeine Anliegen",
-        categoryId: DISCORD_CATEGORIES.allgemeinerSupport,
-        roleIds: [
-            "1559659267324256372", // High Team
-            "1559659267324256366", // Teamleitung
-            "1559659267324256373", // Supervisor
-            "1559659267349553265"  // Management
-        ]
-    },
-    {
-        id: "partner",
-        label: "Partner Ticket",
-        emoji: "🤝",
-        description: "Partnerschaftsanfragen",
-        categoryId: DISCORD_CATEGORIES.leitungsFragen,
-        roleIds: [
-            "1559659267349553265", // Management
-            "1559659267324256372"  // High Team
-        ]
-    },
-    {
-        id: "fraktion",
-        label: "Fraktion",
-        emoji: "🏢",
-        description: "Fraktionsanliegen",
-        categoryId: DISCORD_CATEGORIES.fraktionenWaffenscheine,
-        roleIds: [
-            "1559659267307339839"  // Fraktionsverwaltung
-        ]
-    },
-    {
-        id: "immobilien",
-        label: "Immobilien-Ticket",
-        emoji: "🏠",
-        description: "Immobilien, Häuser und Grundstücke",
-        categoryId: DISCORD_CATEGORIES.fraktionenWaffenscheine,
-        roleIds: ["1559659267307339839"]
-    },
-    {
-        id: "waffenschein",
-        label: "Waffenschein",
-        emoji: "📋",
-        description: "Waffenschein beantragen",
-        categoryId: DISCORD_CATEGORIES.fraktionenWaffenscheine,
-        roleIds: [
-            "1559659267307339839"  // Fraktionsverwaltung
-        ]
-    },
-    {
-        id: "contentcreator",
-        label: "Content Creator",
-        emoji: "🎨",
-        description: "Content-Creator-Anfragen",
-        categoryId: DISCORD_CATEGORIES.allgemeinerSupport,
-        roleIds: [
-            "1559659267349553271", // Leitung
-            "1559659267349553272", // Direktor
-            "1559659267378778217", // High-Ausbilder
-            "1559659267378778221"  // Projektleitung
-        ]
-    },
-    {
-        id: "serverwechsel",
-        label: "Server Wechsel",
-        emoji: "🔄",
-        description: "Anfrage zum Serverwechsel",
-        categoryId: DISCORD_CATEGORIES.leitungsFragen,
-        roleIds: [
-            "1559659267378778221", // Projektleitung
-            "1559659267408134198", // Owner/Co.Owner
-            "1561728076231086243"  // Founder/in
-        ]
-    },
-    {
-        id: "beschwerde",
-        label: "Generelle Beschwerden",
-        emoji: "⚠️",
-        description: "Allgemeine Beschwerden",
-        categoryId: DISCORD_CATEGORIES.allgemeinerSupport,
-        roleIds: [
-            "1559659267324256372", // High Team
-            "1559659267324256366", // Teamleitung
-            "1559659267324256373", // Supervisor
-            "1559659267349553265", // Management
-            "1559659267349553271", // Leitung
-            "1559659267349553272", // Direktor
-            "1559659267378778217"  // High-Ausbilder
-        ]
-    },
-    {
-        id: "teambeschwerde",
-        label: "Team Beschwerde",
-        emoji: "📢",
-        description: "Beschwerde über Teammitglieder",
-        categoryId: DISCORD_CATEGORIES.teambeschwerden,
-        roleIds: [
-            "1559659267324256372", // High Team
-            "1559659267349553265", // Management
-            "1559659267349553272"  // Direktor
-        ]
-    },
-    {
-        id: "coowner",
-        label: "Co-Owner / Owner",
-        emoji: "🏛️",
-        description: "Kontakt zur Serverleitung",
-        categoryId: DISCORD_CATEGORIES.leitungsFragen,
-        roleIds: [
-            "1559659267408134198"  // Owner/Co.Owner
-        ]
-    },
-    {
-        id: "intern",
-        label: "Intern",
-        emoji: "🔒",
-        description: "Interne Angelegenheiten",
-        categoryId: DISCORD_CATEGORIES.highteamFragen,
-        roleIds: [
-            "1559659267378778221", // Projektleitung
-            "1559659267408134198", // Owner/Co.Owner
-            "1561728076231086243"  // Founder/in
-        ]
-    },
-    {
-        id: "highteam",
-        label: "High Team",
-        emoji: "👑",
-        description: "Kontakt zum High Team",
-        categoryId: DISCORD_CATEGORIES.highteamFragen,
-        roleIds: [
-            "1559659267324256372"  // High Team
-        ]
-    }
-];
-
-// =====================================================
-// DATEIEN LESEN / SPEICHERN
-// =====================================================
-
-function readJSON(file, fallback) {
-    try {
-        if (!fs.existsSync(file)) {
-            return fallback;
-        }
-
-        return JSON.parse(
-            fs.readFileSync(file, "utf8")
-        );
-    } catch (error) {
-        console.error("[TICKET] JSON-Lesefehler:", error);
-        return fallback;
-    }
+let initialized=false;
+function initializeTicketSystem(client){
+ if(initialized)return;if(!client)throw new Error("Discord-Client fehlt.");
+ initialized=true;
+ client.on("interactionCreate",handleTicketInteraction);
+ client.on("interactionCreate",handleTicketSlashCommand);
+ client.on("interactionCreate",handleImmobilienPanelSlashCommand);
+ client.on("interactionCreate",handleTicketFeedback);
+ client.on("interactionCreate",handleTicketSetupSlashCommand);
+ async function register(){for(const guild of client.guilds.cache.values()){try{for(const cmd of slashCommands)await guild.commands.create(cmd.toJSON());}catch(e){console.error("[TICKET] Slash-Registrierung:",e);}}}
+ if(client.isReady()){void register();void runReminders(client);}else client.once("clientReady",()=>{void register();void runReminders(client);});
+ client.on("guildCreate",async g=>{for(const cmd of slashCommands)await g.commands.create(cmd.toJSON()).catch(console.error);});
+ const timer=setInterval(()=>{if(client.isReady())runReminders(client).catch(console.error);},REMINDER_CHECK_INTERVAL);timer.unref?.();
+ console.log("✅ NOVEX RP Ticketsystem geladen (/ticketsystem, /ticketsetup, /immobilienpanel).");
 }
-
-function writeJSON(file, data) {
-    try {
-        const temporaryFile = file + ".tmp";
-
-        fs.writeFileSync(
-            temporaryFile,
-            JSON.stringify(data, null, 2),
-            "utf8"
-        );
-
-        fs.renameSync(temporaryFile, file);
-
-        return true;
-    } catch (error) {
-        console.error("[TICKET] JSON-Speicherfehler:", error);
-        return false;
-    }
-}
-
-function loadData() {
-    const data = readJSON(DATA_FILE, {
-        tickets: {}
-    });
-
-    if (!data.tickets) {
-        data.tickets = {};
-    }
-
-    return data;
-}
-
-function saveData(data) {
-    return writeJSON(DATA_FILE, data);
-}
-
-// =====================================================
-// KONFIGURATION
-// =====================================================
-
-function getGuildConfig(guildId) {
-    const all = readJSON(CONFIG_FILE, {
-        guilds: {}
-    });
-
-    const saved = all.guilds?.[guildId] || {};
-
-    return {
-        logChannelId: null,
-        feedbackChannelId: "1559659271329808415",
-        nightLock: true,
-        name: SERVER_NAME,
-        ...saved
-    };
-}
-
-function saveGuildConfig(guildId, config) {
-    const all = readJSON(CONFIG_FILE, {
-        guilds: {}
-    });
-
-    if (!all.guilds) {
-        all.guilds = {};
-    }
-
-    all.guilds[guildId] = config;
-
-    return writeJSON(CONFIG_FILE, all);
-}
-
-// =====================================================
-// ZEIT / NACHTSPERRE
-// =====================================================
-
-function getBerlinHour() {
-    return Number(
-        new Intl.DateTimeFormat("en-GB", {
-            timeZone: TIMEZONE,
-            hour: "numeric",
-            hourCycle: "h23"
-        }).format(new Date())
-    );
-}
-
-function isNightLock(config) {
-    return (
-        config.nightLock !== false &&
-        getBerlinHour() < 8
-    );
-}
-
-// =====================================================
-// ROLLEN / BERECHTIGUNGEN
-// =====================================================
-
-function getTicketType(typeId) {
-    return TICKET_TYPES.find(
-        type => type.id === typeId
-    );
-}
-
-function uniqueIds(ids) {
-    return [...new Set(ids.filter(Boolean))];
-}
-
-function getTicketRoleIds(guild, typeId) {
-    const type = getTicketType(typeId);
-
-    if (!type) return [];
-
-    return uniqueIds(type.roleIds).filter(roleId => {
-        return guild.roles.cache.has(roleId);
-    });
-}
-
-function getGlobalRoleIds(guild) {
-    return uniqueIds(GLOBAL_ACCESS_ROLES).filter(
-        roleId => guild.roles.cache.has(roleId)
-    );
-}
-
-function isGlobalStaff(member) {
-    if (!member) return false;
-
-    // Tatsächlicher Discord-Serverbesitzer
-    if (
-        member.id === member.guild.ownerId
-    ) {
-        return true;
-    }
-
-    // Explizit eingetragener Bot-Owner
-    if (
-        BOT_OWNER_USER_IDS.includes(member.id)
-    ) {
-        return true;
-    }
-
-    // Globale Ausnahmerollen
-    return GLOBAL_ACCESS_ROLES.some(roleId => {
-        return member.roles.cache.has(roleId);
-    });
-}
-
-function isStaff(member, typeId) {
-    if (!member) return false;
-
-    if (isGlobalStaff(member)) {
-        return true;
-    }
-
-    const type = getTicketType(typeId);
-
-    if (!type) return false;
-
-    // Ausschließlich die für diesen Ticket-Typ
-    // zuständigen Rollen dürfen übernehmen/schließen.
-    return type.roleIds.some(roleId => {
-        return member.roles.cache.has(roleId);
-    });
-}
-
-function getDisplayName(member) {
-    return (
-        member.displayName ||
-        member.user?.globalName ||
-        member.user?.username ||
-        "Unbekannt"
-    );
-}
-
-
-// =====================================================
-// 💫 VEXO RP | V1 - PREMIUM SUPPORT PANEL
-// =====================================================
-
-function buildPanel(guild, config) {
-    const name = config.name || SERVER_NAME;
-
-    const embed = new EmbedBuilder()
-        .setColor(0x8052FF)
-        .setAuthor({
-            name: "✦ VEXO RP  |  OFFICIAL SUPPORT"
-        })
-        .setTitle("💫 VEXO SUPPORT HUB")
-        .setDescription([
-            "### ✦ DEINE COMMUNITY. UNSER SUPPORT.",
-            "",
-            "Willkommen im offiziellen Support-Center",
-            "von **Vexo RP | V1**.",
-            "",
-            "Du hast eine Frage, benötigst Hilfe oder",
-            "möchtest ein vertrauliches Anliegen klären?",
-            "",
-            "Wir verbinden dich mit dem Team,",
-            "das für dein Anliegen zuständig ist.",
-            "",
-            "╭・────────────────────・╮",
-            "　　**UNSERE SUPPORT-BEREICHE**",
-            "╰・────────────────────・╯",
-            "### 🎟️ DEIN NÄCHSTER SCHRITT",
-            "",
-            "Klicke auf **Support anfragen** und",
-            "wähle deine gewünschte Ticket-Art.",
-            "",
-            "Dein Ticket wird privat erstellt.",
-            "Die zuständigen Teamrollen erhalten",
-            "automatisch eine Benachrichtigung.",
-            "",
-            config.nightLock !== false
-                ? "🌙 **Ticketzeiten:** 08:00 – 00:00 Uhr"
-                : "🟢 **Ticket-Erstellung:** Rund um die Uhr",
-            "",
-            "🔐 **Vertraulich & rollenbasiert**"
-        ].join("\n"))
-        .setFooter({
-            text: `${name}  ✦  SUPPORT EXPERIENCE`
-        })
-        .setTimestamp();
-
-    const button = new ButtonBuilder()
-        .setCustomId("ticket_open")
-        .setLabel("Support anfragen")
-        .setEmoji("💌")
-        .setStyle(ButtonStyle.Primary);
-
-    return {
-        embeds: [embed],
-        components: [
-            new ActionRowBuilder().addComponents(button)
-        ]
-    };
-}
-
-
-// =====================================================
-// KATEGORIE-AUSWAHL
-// =====================================================
-
-function buildTicketSelect() {
-    const embed = new EmbedBuilder()
-        .setColor(COLOR)
-        .setTitle("🎫 Ticket-Kategorie auswählen")
-        .setDescription(
-            "Bitte wähle die passende Kategorie für dein Anliegen."
-        );
-
-    const select = new StringSelectMenuBuilder()
-        .setCustomId("ticket_select")
-        .setPlaceholder("📂 Ticket-Kategorie wählen ...")
-        .addOptions(
-            TICKET_TYPES.map(type => ({
-                label: type.label,
-                value: type.id,
-                description: type.description,
-                emoji: type.emoji
-            }))
-        );
-
-    const cancel = new ButtonBuilder()
-        .setCustomId("ticket_cancel")
-        .setLabel("Abbrechen")
-        .setEmoji("❌")
-        .setStyle(ButtonStyle.Secondary);
-
-    return {
-        embeds: [embed],
-        components: [
-            new ActionRowBuilder()
-                .addComponents(select),
-            new ActionRowBuilder()
-                .addComponents(cancel)
-        ],
-        flags: 64
-    };
-}
-
-// =====================================================
-// TICKET-BUTTONS
-// =====================================================
-
-function ticketButtons(claimed = false) {
-    return new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-                .setCustomId("ticket_claim")
-                .setLabel("Übernehmen")
-                .setEmoji("🙋")
-                .setStyle(ButtonStyle.Success)
-                .setDisabled(claimed),
-
-            new ButtonBuilder()
-                .setCustomId("ticket_release")
-                .setLabel("Freigeben")
-                .setEmoji("🔓")
-                .setStyle(ButtonStyle.Secondary)
-                .setDisabled(!claimed),
-
-            new ButtonBuilder()
-                .setCustomId("ticket_close")
-                .setLabel("Schließen")
-                .setEmoji("🔒")
-                .setStyle(ButtonStyle.Danger)
-        );
-}
-
-// =====================================================
-// FEHLERMELDUNGEN
-// =====================================================
-
-function describeFailure(result) {
-    switch (result?.reason) {
-        case "night":
-            return (
-                "🌙 Zwischen 00:00 und 08:00 Uhr " +
-                "können keine Tickets erstellt werden."
-            );
-
-        case "exists":
-            return (
-                "📌 Du hast bereits ein offenes Ticket: " +
-                `<#${result.channelId}>`
-            );
-
-        case "nosetup":
-            return (
-                "⚠️ Die zuständige Discord-Kategorie " +
-                "konnte nicht gefunden werden."
-            );
-
-        case "permission":
-            return (
-                "❌ Der Bot hat nicht genügend " +
-                "Berechtigungen."
-            );
-
-        default:
-            return "❌ Das Ticket konnte nicht erstellt werden.";
-    }
-}
-
-// =====================================================
-// OFFENES TICKET SUCHEN
-// =====================================================
-
-async function findOpenTicket(guild, userId) {
-    const data = loadData();
-
-    for (
-        const [channelId, ticket]
-        of Object.entries(data.tickets)
-    ) {
-        if (
-            ticket.guildId !== guild.id ||
-            ticket.userId !== userId
-        ) {
-            continue;
-        }
-
-        const channel = await guild.channels
-            .fetch(channelId)
-            .catch(() => null);
-
-        if (channel) {
-            return channelId;
-        }
-
-        delete data.tickets[channelId];
-        saveData(data);
-    }
-
-    return null;
-}
-
-// =====================================================
-// LOGS
-// =====================================================
-
-async function sendLog(
-    guild,
-    config,
-    embed,
-    files = []
-) {
-    if (!config.logChannelId) {
-        return;
-    }
-
-    try {
-        const channel = await guild.channels
-            .fetch(config.logChannelId)
-            .catch(() => null);
-
-        if (!channel?.isTextBased()) {
-            return;
-        }
-
-        await channel.send({
-            embeds: [embed],
-            files,
-            allowedMentions: {
-                parse: []
-            }
-        });
-    } catch (error) {
-        console.error("[TICKET] Log-Fehler:", error);
-    }
-}
-
-// =====================================================
-// TICKET ERSTELLEN
-// =====================================================
-
-async function createTicket(
-    guild,
-    member,
-    typeId,
-    options = {}
-) {
-    try {
-        const type = getTicketType(typeId);
-
-        if (!type) {
-            return {
-                ok: false,
-                reason: "error"
-            };
-        }
-
-        const config = getGuildConfig(guild.id);
-
-        // Nachtsperre
-        if (isNightLock(config)) {
-            return {
-                ok: false,
-                reason: "night"
-            };
-        }
-
-        // Maximal ein offenes Ticket pro Nutzer
-        const existing = await findOpenTicket(
-            guild,
-            member.id
-        );
-
-        if (existing) {
-            return {
-                ok: false,
-                reason: "exists",
-                channelId: existing
-            };
-        }
-
-        // Passende Discord-Kategorie
-        const parent = await guild.channels
-            .fetch(type.categoryId)
-            .catch(() => null);
-
-        if (
-            !parent ||
-            parent.type !== ChannelType.GuildCategory
-        ) {
-            console.error(
-                `[TICKET] Kategorie fehlt: ${type.categoryId}`
-            );
-
-            return {
-                ok: false,
-                reason: "nosetup"
-            };
-        }
-
-        // Zuständige Teamrollen
-        const ticketRoles = getTicketRoleIds(
-            guild,
-            type.id
-        );
-
-        // Globale Ausnahmerollen erhalten Zugriff,
-        // werden aber NICHT automatisch gepingt.
-        const globalRoles = getGlobalRoleIds(guild);
-
-        const allAccessRoles = uniqueIds([
-            ...ticketRoles,
-            ...globalRoles
-        ]);
-
-        // Private Kanalberechtigungen
-        const overwrites = [
-            {
-                id: guild.id,
-                deny: [
-                    PermissionFlagsBits.ViewChannel
-                ]
-            },
-            {
-                id: member.id,
-                allow: [
-                    PermissionFlagsBits.ViewChannel,
-                    PermissionFlagsBits.SendMessages,
-                    PermissionFlagsBits.ReadMessageHistory,
-                    PermissionFlagsBits.AttachFiles
-                ]
-            },
-            {
-                id: guild.client.user.id,
-                allow: [
-                    PermissionFlagsBits.ViewChannel,
-                    PermissionFlagsBits.SendMessages,
-                    PermissionFlagsBits.ReadMessageHistory,
-                    PermissionFlagsBits.ManageChannels,
-                    PermissionFlagsBits.AttachFiles
-                ]
-            }
-        ];
-
-        for (const roleId of allAccessRoles) {
-            overwrites.push({
-                id: roleId,
-                allow: [
-                    PermissionFlagsBits.ViewChannel,
-                    PermissionFlagsBits.SendMessages,
-                    PermissionFlagsBits.ReadMessageHistory,
-                    PermissionFlagsBits.AttachFiles
-                ]
-            });
-        }
-
-        // Bot-Owner erhält auch ohne Rolle Zugriff.
-        for (const userId of BOT_OWNER_USER_IDS) {
-            if (
-                !userId ||
-                userId === member.id ||
-                userId === guild.client.user.id
-            ) {
-                continue;
-            }
-
-            overwrites.push({
-                id: userId,
-                allow: [
-                    PermissionFlagsBits.ViewChannel,
-                    PermissionFlagsBits.SendMessages,
-                    PermissionFlagsBits.ReadMessageHistory,
-                    PermissionFlagsBits.AttachFiles
-                ]
-            });
-        }
-
-        const cleanName = member.user.username
-            .toLowerCase()
-            .replace(/[^a-z0-9_-]/g, "")
-            .slice(0, 25) || member.id;
-
-        // Ticket-Kanal erstellen
-        const channel = await guild.channels.create({
-            name: `${type.id}-${cleanName}`,
-            type: ChannelType.GuildText,
-            parent: parent.id,
-            topic:
-                `Ticket von ${member.user.username} | ${type.label}`,
-            permissionOverwrites: overwrites
-        });
-
-        // Ticket speichern
-        const data = loadData();
-
-        data.tickets[channel.id] = {
-            guildId: guild.id,
-            userId: member.id,
-            type: type.id,
-            categoryId: parent.id,
-            createdAt: Date.now(),
-            claimedBy: null,
-            lastReminder: null,
-            source: options.source || "panel"
-        };
-
-        if (!saveData(data)) {
-            await channel.delete().catch(() => {});
-
-            return {
-                ok: false,
-                reason: "error"
-            };
-        }
-
-        const creatorName = getDisplayName(member);
-
-        // Start-Embed OHNE Nutzer-Ping
-        const embed = new EmbedBuilder()
-            .setColor(COLOR)
-            .setTitle(
-                `${type.emoji} ${type.label}`
-            )
-            .setDescription(
-                [
-                    `Hallo **${creatorName}**!`,
-                    "",
-                    "Willkommen in deinem Support-Ticket.",
-                    "",
-                    "📝 Bitte beschreibe dein Anliegen",
-                    "so genau wie möglich.",
-                    "",
-                    "🔔 Das zuständige Team wurde",
-                    "automatisch benachrichtigt.",
-                    "",
-                    "⏳ Ein Teammitglied wird sich",
-                    "bald bei dir melden.",
-                    "",
-                    "━━━━━━━━━━━━━━━━━━━━━━━━"
-                ].join("\n")
-            )
-            .addFields(
-                {
-                    name: "👤 Ersteller",
-                    value: creatorName,
-                    inline: true
-                },
-                {
-                    name: "📂 Kategorie",
-                    value: type.label,
-                    inline: true
-                },
-                {
-                    name: "📌 Status",
-                    value: "🟡 Offen",
-                    inline: true
-                }
-            )
-            .setFooter({
-                text: `${SERVER_NAME} • Support`
-            })
-            .setTimestamp();
-
-        if (options.question) {
-            embed.addFields({
-                name: "❓ Ursprüngliche Frage",
-                value: String(
-                    options.question
-                ).slice(0, 1000)
-            });
-        }
-
-        // NUR ZUSTÄNDIGE TEAMROLLEN PINGEN
-        // KEIN PING AN DEN TICKET-ERSTELLER
-        const roleMentions = ticketRoles
-            .map(roleId => `<@&${roleId}>`)
-            .join(" ");
-
-        await channel.send({
-            content:
-                roleMentions ||
-                "🎫 Neues Support-Ticket erstellt.",
-            embeds: [embed],
-            components: [
-                ticketButtons(false)
-            ],
-            allowedMentions: {
-                parse: [],
-                roles: ticketRoles,
-                users: []
-            }
-        });
-
-        // Log
-        await sendLog(
-            guild,
-            config,
-            new EmbedBuilder()
-                .setColor(0x57F287)
-                .setTitle("🎫 Ticket erstellt")
-                .addFields(
-                    {
-                        name: "Ersteller",
-                        value: creatorName,
-                        inline: true
-                    },
-                    {
-                        name: "Kategorie",
-                        value: type.label,
-                        inline: true
-                    },
-                    {
-                        name: "Kanal",
-                        value: `<#${channel.id}>`,
-                        inline: true
-                    }
-                )
-                .setTimestamp()
-        );
-
-        return {
-            ok: true,
-            channel
-        };
-
-    } catch (error) {
-        console.error(
-            "[TICKET] Erstellen fehlgeschlagen:",
-            error
-        );
-
-        return {
-            ok: false,
-            reason: "error"
-        };
-    }
-}
-
-// =====================================================
-// TRANSCRIPT
-// =====================================================
-
-async function buildTranscript(channel) {
-    const messages = [];
-    let before;
-
-    // Bis zu 1000 Nachrichten
-    for (let i = 0; i < 10; i++) {
-        const batch = await channel.messages.fetch({
-            limit: 100,
-            before
-        });
-
-        if (!batch.size) {
-            break;
-        }
-
-        messages.push(
-            ...batch.values()
-        );
-
-        before = batch.last().id;
-
-        if (batch.size < 100) {
-            break;
-        }
-    }
-
-    messages.sort(
-        (a, b) =>
-            a.createdTimestamp -
-            b.createdTimestamp
-    );
-
-    return messages.map(message => {
-        const time = new Date(
-            message.createdTimestamp
-        ).toLocaleString("de-DE", {
-            timeZone: TIMEZONE
-        });
-
-        const attachments = [
-            ...message.attachments.values()
-        ].map(file => file.url).join(", ");
-
-        return (
-            `[${time}] ` +
-            `${message.author.username}: ` +
-            `${message.content || "[Embed/Datei]"} ` +
-            `${attachments}`
-        );
-    }).join("\n");
-}
-
-// =====================================================
-// TICKET ABSCHLIESSEN, DM + FEEDBACK + TRANSCRIPT
-// =====================================================
-
-const closingTickets = new Set();
-
-async function closeTicketWithFeedback(channel, ticket, reason, closedBy) {
-    if (!channel || closingTickets.has(channel.id)) return false;
-    closingTickets.add(channel.id);
-    try {
-        const config = getGuildConfig(channel.guild.id);
-        const typeName = getTicketType(ticket.type)?.label || ticket.type;
-        const user = await channel.client.users.fetch(ticket.userId).catch(() => null);
-
-        // Die DM enthält fünf Stern-Buttons; die Bewertung erfolgt per Modal.
-        const feedbackState = readJSON(FEEDBACK_FILE, { entries: {}, owners: {}, tickets: {} });
-        feedbackState.entries ||= {};
-        feedbackState.owners ||= {};
-        feedbackState.tickets ||= {};
-        feedbackState.owners[channel.id] = ticket.userId;
-        feedbackState.tickets[channel.id] = {
-            guildId: channel.guild.id,
-            type: typeName,
-            claimedBy: ticket.claimedBy || null,
-            closedBy: String(closedBy),
-            closedAt: Date.now()
-        };
-        if (!writeJSON(FEEDBACK_FILE, feedbackState)) {
-            console.error("[TICKET] Feedback-Daten konnten nicht gespeichert werden.");
-        }
-        if (user) {
-            const feedbackRow = new ActionRowBuilder().addComponents(
-                ...[1, 2, 3, 4, 5].map(stars =>
-                    new ButtonBuilder()
-                        .setCustomId(`ticket_feedback_star_${stars}_${channel.id}`)
-                        .setLabel("⭐".repeat(stars))
-                        .setStyle(ButtonStyle.Primary)
-                )
-            );
-            await user.send({
-                embeds: [new EmbedBuilder()
-                    .setColor(0x0893F3)
-                    .setAuthor({ name: "💫 VEXO RP | V1 • SUPPORT" })
-                    .setTitle("💙 DEINE MEINUNG ZÄHLT!")
-                    .setDescription([
-                        "━━━━━━━━━━━━━━━━━━━━",
-                        "",
-                        "🔒 **Dein Support-Ticket wurde geschlossen.**",
-                        "",
-                        "Vielen Dank, dass du den Support von **Vexo RP | V1** genutzt hast!",
-                        "",
-                        "⭐ **Wie zufrieden warst du mit unserem Support?**",
-                        "",
-                        "Wähle unten **1 bis 5 Sterne** aus. Anschließend kannst du uns in einem kurzen Formular sagen, warum du so bewertet hast.",
-                        "",
-                        "🔐 Dein Feedback wird an unsere Serververwaltung weitergeleitet.",
-                        "",
-                        "━━━━━━━━━━━━━━━━━━━━"
-                    ].join("\n"))
-                    .addFields(
-                        { name: "🎫 Ticketart", value: typeName, inline: true },
-                        { name: "👨‍💻 Bearbeitet von", value: ticket.claimedBy ? `<@${ticket.claimedBy}>` : "Nicht übernommen", inline: true }
-                    )
-                    .setFooter({ text: "💫 Vexo RP | V1 • Support Experience" })
-                    .setTimestamp()],
-                components: [feedbackRow],
-                allowedMentions: { parse: [] }
-            }).catch(error => console.warn(`[TICKET] DM an ${ticket.userId} nicht möglich:`, error.message));
-        }
-
-        const logEmbed = new EmbedBuilder().setColor(0xED4245)
-            .setTitle("🔒 Ticket geschlossen")
-            .addFields(
-                { name: "Ersteller", value: `<@${ticket.userId}>`, inline: true },
-                { name: "Ticketart", value: typeName, inline: true },
-                { name: "Geschlossen von", value: closedBy, inline: true },
-                { name: "Grund", value: reason }
-            ).setTimestamp();
-        if (config.logChannelId) {
-            try {
-                const transcript = await buildTranscript(channel);
-                const file = new AttachmentBuilder(Buffer.from(transcript || "Keine Nachrichten", "utf8"), {
-                    name: `transcript-${channel.id}.txt`
-                });
-                await sendLog(channel.guild, config, logEmbed, [file]);
-            } catch (error) {
-                console.error("[TICKET] Transcript fehlgeschlagen:", error);
-                await sendLog(channel.guild, config, logEmbed);
-            }
-        }
-
-        const data = loadData();
-        delete data.tickets[channel.id];
-        if (!saveData(data)) {
-            console.error("[TICKET] Konnte Ticket-Daten nicht speichern:", channel.id);
-            return false;
-        }
-        await channel.send({
-            embeds: [new EmbedBuilder().setColor(0xED4245).setTitle("🔒 Ticket geschlossen")
-                .setDescription(`${reason}\n\nDer Kanal wird in 5 Sekunden gelöscht.`).setTimestamp()],
-            allowedMentions: { parse: [] }
-        }).catch(() => {});
-        setTimeout(() => channel.delete(reason).catch(error => {
-            console.error("[TICKET] Kanal konnte nicht gelöscht werden:", error);
-        }), 5000);
-        return true;
-    } finally {
-        closingTickets.delete(channel.id);
-    }
-}
-
-async function handleTicketFeedback(interaction) {
-    if (!interaction.isButton() && !interaction.isModalSubmit()) return;
-    const id = interaction.customId || "";
-    const buttonMatch = /^ticket_feedback_star_([1-5])_(\d+)$/.exec(id);
-    const modalMatch = /^ticket_feedback_modal_([1-5])_(\d+)$/.exec(id);
-    if (!buttonMatch && !modalMatch) return;
-
-    const [, ratingString, channelId] = buttonMatch || modalMatch;
-    const rating = Number(ratingString);
-    const feedback = readJSON(FEEDBACK_FILE, { entries: {}, owners: {}, tickets: {} });
-    feedback.entries ||= {};
-    feedback.owners ||= {};
-    feedback.tickets ||= {};
-    const key = `${channelId}:${interaction.user.id}`;
-
-    if (feedback.owners[channelId] !== interaction.user.id) {
-        return interaction.reply({ content: "🔒 Du darfst dieses Ticket nicht bewerten.", flags: 64 });
-    }
-    if (feedback.entries[key]) {
-        return interaction.reply({ content: "ℹ️ Du hast dieses Ticket bereits bewertet.", flags: 64 });
-    }
-
-    if (buttonMatch) {
-        const modal = new ModalBuilder()
-            .setCustomId(`ticket_feedback_modal_${rating}_${channelId}`)
-            .setTitle("💙 Vexo RP | Bewertung");
-        const reason = new TextInputBuilder()
-            .setCustomId("ticket_feedback_reason")
-            .setLabel("Grund für deine Bewertung")
-            .setPlaceholder("Warum gibst du diese Bewertung?")
-            .setStyle(TextInputStyle.Paragraph)
-            .setRequired(true)
-            .setMinLength(2)
-            .setMaxLength(1000);
-        modal.addComponents(new ActionRowBuilder().addComponents(reason));
-        return interaction.showModal(modal);
-    }
-
-    await interaction.deferReply({ flags: 64 });
-    const reason = interaction.fields.getTextInputValue("ticket_feedback_reason").trim();
-    if (reason.length < 2) {
-        return interaction.editReply("❌ Bitte gib einen Bewertungsgrund an.");
-    }
-    // Erneut lesen, damit zwischen Öffnen und Absenden kein Duplikat entsteht.
-    const current = readJSON(FEEDBACK_FILE, { entries: {}, owners: {}, tickets: {} });
-    current.entries ||= {};
-    if (current.entries[key]) {
-        return interaction.editReply("ℹ️ Du hast dieses Ticket bereits bewertet.");
-    }
-    const ticketInfo = current.tickets?.[channelId] || {};
-    current.entries[key] = {
-        ticketChannelId: channelId,
-        guildId: ticketInfo.guildId || null,
-        userId: interaction.user.id,
-        stars: rating,
-        reason,
-        claimedBy: ticketInfo.claimedBy || null,
-        ratedAt: Date.now()
-    };
-    if (!writeJSON(FEEDBACK_FILE, current)) {
-        return interaction.editReply("❌ Bewertung konnte nicht gespeichert werden.");
-    }
-
-    const guild = ticketInfo.guildId
-        ? await interaction.client.guilds.fetch(ticketInfo.guildId).catch(() => null)
-        : null;
-    if (guild) {
-        const config = getGuildConfig(guild.id);
-        if (config.feedbackChannelId) {
-            const logChannel = await guild.channels.fetch(config.feedbackChannelId).catch(() => null);
-            if (logChannel?.isTextBased()) {
-                const ratingDisplay = "⭐".repeat(rating) + "☆".repeat(5 - rating);
-                const embed = new EmbedBuilder()
-                    .setColor(0x0893F3)
-                    .setTitle("💙 VEXO RP | NEUE SUPPORT-BEWERTUNG")
-                    .setDescription("━━━━━━━━━━━━━━━━━━━━")
-                    .addFields(
-                        { name: "👤 Von", value: `<@${interaction.user.id}>` },
-                        { name: "⭐ Bewertung", value: `${ratingDisplay} (**${rating}/5**)` },
-                        { name: "🛠️ Staff", value: ticketInfo.claimedBy ? `<@${ticketInfo.claimedBy}>` : "Nicht übernommen" },
-                        { name: "📝 Grund", value: reason },
-                        { name: "🕒 Wann", value: `<t:${Math.floor(Date.now()/1000)}:f>` }
-                    )
-                    .setFooter({ text: "Vexo RP Ticketsystem • Bewertungen" })
-                    .setTimestamp();
-                await logChannel.send({ embeds: [embed], allowedMentions: { parse: [] } })
-                    .catch(error => console.error("[TICKET] Bewertungslog fehlgeschlagen:", error));
-            }
-        }
-    }
-    await interaction.editReply(`💙 Vielen Dank für dein Feedback! Du hast **${rating}/5 Sterne** vergeben.`);
-    // Buttons nach erfolgreicher Bewertung deaktivieren.
-    if (interaction.message?.editable) {
-        await interaction.message.edit({ components: [] }).catch(() => {});
-    }
-}
-
-// =====================================================
-// INTERAKTIONEN
-// =====================================================
-
-async function handleTicketInteraction(interaction) {
-    if (!interaction.guild) {
-        return;
-    }
-
-    const id = interaction.customId;
-
-    if (!id?.startsWith("ticket_")) {
-        return;
-    }
-
-    try {
-        const config = getGuildConfig(
-            interaction.guild.id
-        );
-
-        // Eigenständiges Immobilien-Panel (ohne Auswahlmenü)
-        if (interaction.isButton() && id === "ticket_immobilien_open") {
-            await interaction.deferReply({ flags: 64 });
-            const member = await interaction.guild.members.fetch(interaction.user.id);
-            const result = await createTicket(interaction.guild, member, "immobilien", { source: "immobilien-panel" });
-            return interaction.editReply({
-                content: result.ok ? `✅ Dein Immobilien-Ticket wurde erstellt: <#${result.channel.id}>` : describeFailure(result)
-            });
-        }
-
-        // ---------------------------------------------
-        // TICKET ERSTELLEN
-        // ---------------------------------------------
-
-        if (
-            interaction.isButton() &&
-            id === "ticket_open"
-        ) {
-            if (isNightLock(config)) {
-                return interaction.reply({
-                    content: describeFailure({
-                        reason: "night"
-                    }),
-                    flags: 64
-                });
-            }
-
-            const existing = await findOpenTicket(
-                interaction.guild,
-                interaction.user.id
-            );
-
-            if (existing) {
-                return interaction.reply({
-                    content: describeFailure({
-                        reason: "exists",
-                        channelId: existing
-                    }),
-                    flags: 64
-                });
-            }
-
-            return interaction.reply(
-                buildTicketSelect()
-            );
-        }
-
-        // ---------------------------------------------
-        // ABBRECHEN
-        // ---------------------------------------------
-
-        if (
-            interaction.isButton() &&
-            id === "ticket_cancel"
-        ) {
-            return interaction.update({
-                content: "❌ Abgebrochen.",
-                embeds: [],
-                components: []
-            });
-        }
-
-        // ---------------------------------------------
-        // TICKET-KATEGORIE
-        // ---------------------------------------------
-
-        if (
-            interaction.isStringSelectMenu() &&
-            id === "ticket_select"
-        ) {
-            await interaction.deferUpdate();
-
-            const member = await interaction.guild.members
-                .fetch(interaction.user.id);
-
-            const result = await createTicket(
-                interaction.guild,
-                member,
-                interaction.values[0]
-            );
-
-            return interaction.editReply({
-                content: result.ok
-                    ? (
-                        "✅ Dein Ticket wurde erstellt: " +
-                        `<#${result.channel.id}>`
-                    )
-                    : describeFailure(result),
-                embeds: [],
-                components: []
-            });
-        }
-
-        // ---------------------------------------------
-        // TICKET ÜBERNEHMEN
-        // ---------------------------------------------
-
-        if (
-            interaction.isButton() &&
-            id === "ticket_claim"
-        ) {
-            const data = loadData();
-
-            const ticket = data.tickets[
-                interaction.channelId
-            ];
-
-            if (!ticket) {
-                return interaction.reply({
-                    content: "❌ Kein aktives Ticket.",
-                    flags: 64
-                });
-            }
-
-            // Aktuelle Rollen des Nutzers laden
-            const member = await interaction.guild.members
-                .fetch(interaction.user.id);
-
-            if (!isStaff(member, ticket.type)) {
-                return interaction.reply({
-                    content:
-                        "🔒 **Keine Berechtigung!**\n\n" +
-                        "Nur die für dieses Ticket " +
-                        "zuständigen Teamrollen dürfen " +
-                        "es übernehmen.",
-                    flags: 64
-                });
-            }
-
-            if (ticket.claimedBy) {
-                return interaction.reply({
-                    content:
-                        "⚠️ Dieses Ticket wurde bereits " +
-                        "von einem Teammitglied übernommen.",
-                    flags: 64
-                });
-            }
-
-            ticket.claimedBy = interaction.user.id;
-
-            if (!saveData(data)) {
-                return interaction.reply({
-                    content: "❌ Speichern fehlgeschlagen.",
-                    flags: 64
-                });
-            }
-
-            await interaction.update({
-                components: [
-                    ticketButtons(true)
-                ]
-            });
-
-            const staffName = getDisplayName(member);
-
-            // SCHÖNE ÜBERNAHME-NACHRICHT
-            const claimEmbed = new EmbedBuilder()
-                .setColor(0x57F287)
-                .setTitle("🙋 Ticket übernommen!")
-                .setDescription(
-                    [
-                        "━━━━━━━━━━━━━━━━━━━━━━━━",
-                        "",
-                        `**${staffName}** hat dieses Ticket übernommen!`,
-                        "",
-                        "🛠️ Dieses Teammitglied kümmert sich",
-                        "ab sofort um dein Anliegen.",
-                        "",
-                        "💬 Bitte bleibe im Ticket und",
-                        "beantworte mögliche Rückfragen.",
-                        "",
-                        "🤝 Vielen Dank für deine Geduld!",
-                        "",
-                        "━━━━━━━━━━━━━━━━━━━━━━━━"
-                    ].join("\n")
-                )
-                .addFields(
-                    {
-                        name: "👤 Zuständiges Teammitglied",
-                        value: staffName,
-                        inline: true
-                    },
-                    {
-                        name: "📌 Ticket-Status",
-                        value: "🟢 In Bearbeitung",
-                        inline: true
-                    }
-                )
-                .setFooter({
-                    text: `${SERVER_NAME} • Support-Team`
-                })
-                .setTimestamp();
-
-            return interaction.channel.send({
-                embeds: [claimEmbed],
-                allowedMentions: {
-                    parse: []
-                }
-            });
-        }
-
-        // ---------------------------------------------
-        // TICKET FREIGEBEN
-        // ---------------------------------------------
-
-        if (interaction.isButton() && id === "ticket_release") {
-            const data = loadData();
-            const ticket = data.tickets[interaction.channelId];
-
-            if (!ticket) {
-                return interaction.reply({
-                    content: "❌ Kein aktives Ticket.",
-                    flags: 64
-                });
-            }
-
-            const member = await interaction.guild.members.fetch(interaction.user.id);
-
-            if (!isStaff(member, ticket.type)) {
-                return interaction.reply({
-                    content: "🔒 Nur zuständige Teammitglieder dürfen dieses Ticket freigeben.",
-                    flags: 64
-                });
-            }
-
-            if (!ticket.claimedBy) {
-                return interaction.reply({
-                    content: "⚠️ Dieses Ticket wurde noch nicht übernommen.",
-                    flags: 64
-                });
-            }
-
-            if (ticket.claimedBy !== interaction.user.id && !isGlobalStaff(member)) {
-                return interaction.reply({
-                    content: "🔒 Nur das Teammitglied, das das Ticket übernommen hat, oder die Serverleitung darf es freigeben.",
-                    flags: 64
-                });
-            }
-
-            const staffName = getDisplayName(member);
-            ticket.claimedBy = null;
-            ticket.lastReminder = Date.now();
-
-            if (!saveData(data)) {
-                return interaction.reply({
-                    content: "❌ Die Freigabe konnte nicht gespeichert werden.",
-                    flags: 64
-                });
-            }
-
-            await interaction.update({
-                components: [ticketButtons(false)]
-            });
-
-            const releaseEmbed = new EmbedBuilder()
-                .setColor(0xF1C40F)
-                .setTitle("🔓 Ticket freigegeben!")
-                .setDescription([
-                    "━━━━━━━━━━━━━━━━━━━━━━━━",
-                    "",
-                    `**${staffName}** hat dieses Ticket freigegeben.`,
-                    "",
-                    "📋 Das Ticket ist wieder offen und kann",
-                    "von einem anderen zuständigen Teammitglied",
-                    "übernommen werden.",
-                    "",
-                    "🤝 Bitte habe etwas Geduld, bis sich",
-                    "jemand Neues um dein Anliegen kümmert.",
-                    "",
-                    "━━━━━━━━━━━━━━━━━━━━━━━━"
-                ].join("\n"))
-                .addFields({
-                    name: "📌 Ticket-Status",
-                    value: "🟡 Offen – wartet auf Übernahme",
-                    inline: false
-                })
-                .setFooter({ text: `${SERVER_NAME} • Support-Team` })
-                .setTimestamp();
-
-            return interaction.channel.send({
-                embeds: [releaseEmbed],
-                allowedMentions: { parse: [] }
-            });
-        }
-
-        // ---------------------------------------------
-        // TICKET SCHLIESSEN
-        // ---------------------------------------------
-
-        if (
-            interaction.isButton() &&
-            id === "ticket_close"
-        ) {
-            const data = loadData();
-
-            const ticket = data.tickets[
-                interaction.channelId
-            ];
-
-            if (!ticket) {
-                return interaction.reply({
-                    content: "❌ Kein aktives Ticket.",
-                    flags: 64
-                });
-            }
-
-            const member = await interaction.guild.members
-                .fetch(interaction.user.id);
-
-            // Auch der Ticket-Ersteller darf NICHT
-            // schließen, außer er ist berechtigtes Team.
-            if (!isStaff(member, ticket.type)) {
-                return interaction.reply({
-                    content:
-                        "🔒 **Keine Berechtigung!**\n\n" +
-                        "Nur zuständige Teammitglieder " +
-                        "oder die Serverleitung dürfen " +
-                        "dieses Ticket schließen.",
-                    flags: 64
-                });
-            }
-
-            await interaction.deferReply({ flags: 64 });
-            const closed = await closeTicketWithFeedback(
-                interaction.channel, ticket, "Manuell durch das Support-Team geschlossen", getDisplayName(member)
-            );
-            await interaction.editReply({ content: closed
-                ? "✅ Ticket geschlossen. Der Ersteller erhält eine Feedback-DM, sofern DMs erlaubt sind."
-                : "❌ Das Ticket konnte nicht geschlossen werden."
-            });
-            return;
-        }
-
-    } catch (error) {
-        console.error(
-            "[TICKET] Interaktionsfehler:",
-            error
-        );
-
-        const payload = {
-            content: "❌ Ein Fehler ist aufgetreten.",
-            flags: 64
-        };
-
-        if (
-            interaction.deferred ||
-            interaction.replied
-        ) {
-            await interaction.followUp(
-                payload
-            ).catch(() => {});
-        } else {
-            await interaction.reply(
-                payload
-            ).catch(() => {});
-        }
-    }
-}
-
-
-// =====================================================
-// 🎫 VEXO RP | /ticketsystem
-// Mit Fehlerdiagnose und sicherer Fehlerbehandlung
-// =====================================================
-
-async function handleTicketSlashCommand(interaction) {
-    if (!interaction.isChatInputCommand()) {
-        return;
-    }
-
-    if (interaction.commandName !== "ticketsystem") {
-        return;
-    }
-
-    // =====================================================
-    // 🔍 DIAGNOSE: Prüfen, ob der Befehl erkannt wird
-    // =====================================================
-
-    console.log(
-        "🎫 [TICKET] /ticketsystem erkannt!",
-        "Benutzer:", interaction.user.tag,
-        "Server:", interaction.guild?.name
-    );
-
-    // =====================================================
-    // 🌐 SERVER- UND KANALPRÜFUNG
-    // =====================================================
-
-    if (
-        !interaction.guild ||
-        !interaction.channel?.isTextBased()
-    ) {
-        return interaction.reply({
-            content: "❌ Nur in Server-Textkanälen möglich.",
-            flags: 64
-        });
-    }
-
-    // =====================================================
-    // 🔒 BERECHTIGUNGSPRÜFUNG
-    // =====================================================
-
-    if (
-        !interaction.memberPermissions?.has(
-            PermissionFlagsBits.ManageGuild
-        )
-    ) {
-        return interaction.reply({
-            content: "🔒 Du benötigst Server verwalten.",
-            flags: 64
-        });
-    }
-
-    // =====================================================
-    // 🎫 TICKET-PANEL ERSTELLEN
-    // =====================================================
-
-    try {
-        await interaction.deferReply({
-            flags: 64
-        });
-
-        console.log(
-            "🎫 [TICKET] Erstelle Ticket-Panel im Kanal:",
-            interaction.channel.name
-        );
-
-        const config = getGuildConfig(
-            interaction.guild.id
-        );
-
-        await interaction.channel.send(
-            buildPanel(
-                interaction.guild,
-                config
-            )
-        );
-
-        await interaction.editReply({
-            content: "✅ Ticket-Panel erfolgreich erstellt!"
-        });
-
-        console.log(
-            "✅ [TICKET] Ticket-Panel erfolgreich gesendet!"
-        );
-
-    } catch (error) {
-        console.error(
-            "❌ [TICKET] Slash-Fehler:",
-            error
-        );
-
-        if (
-            interaction.deferred ||
-            interaction.replied
-        ) {
-            await interaction.editReply({
-                content: "❌ Panel konnte nicht erstellt werden."
-            }).catch(() => {});
-        } else {
-            await interaction.reply({
-                content: "❌ Panel konnte nicht erstellt werden.",
-                flags: 64
-            }).catch(() => {});
-        }
-    }
-}
-
-
-// =====================================================
-// /ticketsetup – sämtliche Einstellungen als Slash-Befehle
-// =====================================================
-
-async function handleTicketSetupSlashCommand(interaction) {
-    if (!interaction.isChatInputCommand() || interaction.commandName !== "ticketsetup") return;
-    if (!interaction.guild || !interaction.channel?.isTextBased()) {
-        return interaction.reply({ content: "❌ Nur auf einem Server möglich.", flags: 64 });
-    }
-    if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-        return interaction.reply({ content: "🔒 Du benötigst Server verwalten.", flags: 64 });
-    }
-
-    const sub = interaction.options.getSubcommand();
-    const config = getGuildConfig(interaction.guild.id);
-
-    try {
-        await interaction.deferReply({ flags: 64 });
-
-        if (sub === "log" || sub === "bewertungen") {
-            const channel = interaction.options.getChannel("kanal", true);
-            if (!channel.isTextBased() || channel.isDMBased()) {
-                return interaction.editReply("❌ Bitte einen Server-Textkanal auswählen.");
-            }
-            if (sub === "log") config.logChannelId = channel.id;
-            else config.feedbackChannelId = channel.id;
-            if (!saveGuildConfig(interaction.guild.id, config)) {
-                return interaction.editReply("❌ Speichern fehlgeschlagen.");
-            }
-            return interaction.editReply(
-                sub === "log" ? `✅ Log-Kanal: <#${channel.id}>` : `⭐ Bewertungskanal: <#${channel.id}>`
-            );
-        }
-        if (sub === "nachtsperre") {
-            const status = interaction.options.getString("status", true);
-            config.nightLock = status === "an";
-            if (!saveGuildConfig(interaction.guild.id, config)) {
-                return interaction.editReply("❌ Speichern fehlgeschlagen.");
-            }
-            return interaction.editReply(`🌙 Nachtsperre ${status}.`);
-        }
-        if (sub === "name") {
-            config.name = interaction.options.getString("text", true);
-            if (!saveGuildConfig(interaction.guild.id, config)) {
-                return interaction.editReply("❌ Speichern fehlgeschlagen.");
-            }
-            return interaction.editReply("✅ Panelname gespeichert.");
-        }
-        if (sub === "status") {
-            return interaction.editReply([
-                "**🎫 Vexo RP Ticketsystem**",
-                `📂 Ticketarten: ${TICKET_TYPES.length}`,
-                "👥 Rollen-Pings: Aktiv",
-                "🔒 Rechteprüfung: Aktiv",
-                `📋 Log: ${config.logChannelId ? `<#${config.logChannelId}>` : "Nicht gesetzt"}`,
-                `⭐ Bewertungen: ${config.feedbackChannelId ? `<#${config.feedbackChannelId}>` : "Nicht gesetzt"}`,
-                `🌙 Nachtsperre: ${config.nightLock ? "An" : "Aus"}`
-            ].join("\n"));
-        }
-        return interaction.editReply("❌ Unbekannter Unterbefehl.");
-    } catch (error) {
-        console.error("[TICKET] /ticketsetup:", error);
-        if (interaction.deferred || interaction.replied) {
-            return interaction.editReply("❌ Der Befehl konnte nicht ausgeführt werden.").catch(() => {});
-        }
-        return interaction.reply({ content: "❌ Ein Fehler ist aufgetreten.", flags: 64 }).catch(() => {});
-    }
-}
-
-// =====================================================
-// ERINNERUNGEN
-// =====================================================
-
-async function runReminders(client) {
-    const data = loadData();
-    const now = Date.now();
-    let changed = false;
-
-    for (const [channelId, ticket] of Object.entries(data.tickets)) {
-        if (closingTickets.has(channelId)) continue;
-        const channel = await client.channels.fetch(channelId).catch(() => null);
-        if (!channel || !channel.isTextBased() || !channel.guild) {
-            delete data.tickets[channelId];
-            changed = true;
-            continue;
-        }
-
-        // Jedes Ticket schließt 48 Stunden nach seiner Erstellung automatisch,
-        // unabhängig davon, ob es übernommen wurde.
-        if (now - ticket.createdAt >= TICKET_MAX_AGE) {
-            const closed = await closeTicketWithFeedback(
-                channel, ticket, "Automatisch nach 48 Stunden geschlossen", "Automatisches Ticketsystem"
-            );
-            if (closed) {
-                delete data.tickets[channelId];
-                changed = true;
-            }
-            continue;
-        }
-
-        const last = ticket.lastReminder || ticket.createdAt;
-        if (now - last < REMINDER_INTERVAL) continue;
-
-        try {
-            if (ticket.claimedBy) {
-                await channel.send({
-                    content: `⏰ **Ticket-Erinnerung (alle 5 Stunden)**\n\n` +
-                        `Dieses Ticket ist noch offen.\n` +
-                        `🙋 Zuständig: <@${ticket.claimedBy}>\n` +
-                        `👤 Ticket-Ersteller: <@${ticket.userId}>\n\n` +
-                        `Bitte kümmert euch um die weitere Bearbeitung.`,
-                    allowedMentions: { parse: [], users: [ticket.claimedBy, ticket.userId], roles: [] }
-                });
-            } else {
-                const roles = getTicketRoleIds(channel.guild, ticket.type);
-                const roleMentions = roles.map(id => `<@&${id}>`).join(" ");
-                await channel.send({
-                    content: `⏰ **Ticket-Erinnerung (alle 5 Stunden)**\n\n` +
-                        `Dieses Ticket wurde noch nicht übernommen.\n` +
-                        `👤 Ersteller: <@${ticket.userId}>\n` +
-                        `📢 Zuständiges Team: ${roleMentions || "Bitte Ticket prüfen."}`,
-                    allowedMentions: { parse: [], users: [ticket.userId], roles }
-                });
-            }
-            ticket.lastReminder = now;
-            changed = true;
-        } catch (error) {
-            console.error("[TICKET] Erinnerungsfehler:", error);
-        }
-    }
-    if (changed) saveData(data);
-}
-
-// =====================================================
-// 🏠 VEXO RP | /immobilienpanel
-// =====================================================
-
-async function handleImmobilienPanelSlashCommand(interaction) {
-    if (!interaction.isChatInputCommand() ||
-        interaction.commandName !== "immobilienpanel") return;
-
-    console.log("🏠 [IMMOBILIEN] /immobilienpanel erkannt:", interaction.user.tag);
-
-    try {
-        if (!interaction.guild ||
-            !interaction.channel ||
-            interaction.channel.type !== ChannelType.GuildText) {
-            return await interaction.reply({
-                content: "❌ Nur in Server-Textkanälen möglich.",
-                flags: 64
-            });
-        }
-
-        if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-            return await interaction.reply({
-                content: "🔒 Du benötigst die Berechtigung Server verwalten.",
-                flags: 64
-            });
-        }
-
-        await interaction.deferReply({ flags: 64 });
-
-        const embed = new EmbedBuilder()
-            .setColor(0x0893F3)
-            .setTitle("🏠 VEXO RP | IMMOBILIEN-SERVICE")
-            .setDescription([
-                "**Dein direkter Kontakt zur Immobilienverwaltung**",
-                "",
-                "🏡 Du hast Fragen zu Immobilien, Häusern oder Grundstücken?",
-                "",
-                "📋 **So funktioniert es:**",
-                "• Klicke unten auf **Immobilien-Ticket erstellen**.",
-                "• Es öffnet sich ein privates Ticket.",
-                "• Die zuständige Fraktionsverwaltung wird benachrichtigt.",
-                "",
-                "🔐 Dein Anliegen wird vertraulich behandelt."
-            ].join("\n"))
-            .setFooter({ text: "💫 Vexo RP | Immobilien-Service" })
-            .setTimestamp();
-
-        const row = new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId("ticket_immobilien_open")
-                .setLabel("Immobilien-Ticket erstellen")
-                .setEmoji("🏠")
-                .setStyle(ButtonStyle.Primary)
-        );
-
-        await interaction.channel.send({
-            embeds: [embed],
-            components: [row],
-            allowedMentions: { parse: [] }
-        });
-
-        await interaction.editReply({
-            content: "✅ Immobilien-Panel erfolgreich erstellt!"
-        });
-    } catch (error) {
-        console.error("[IMMOBILIEN] Slash-Fehler:", error);
-        if (interaction.deferred || interaction.replied) {
-            await interaction.editReply({
-                content: "❌ Immobilien-Panel konnte nicht erstellt werden."
-            }).catch(() => {});
-        } else {
-            await interaction.reply({
-                content: "❌ Immobilien-Panel konnte nicht erstellt werden.",
-                flags: 64
-            }).catch(() => {});
-        }
-    }
-}
-
-// =====================================================
-// INITIALISIERUNG
-// =====================================================
-
-let initialized = false;
-
-function initializeTicketSystem(client) {
-    if (initialized) return;
-    if (!client) throw new Error("Kein Discord-Client übergeben.");
-
-    client.on("interactionCreate", handleTicketInteraction);
-    client.on("interactionCreate", handleTicketSlashCommand);
-    client.on("interactionCreate", handleImmobilienPanelSlashCommand);
-    client.on("interactionCreate", handleTicketFeedback);
-    client.on("interactionCreate", handleTicketSetupSlashCommand);
-
-    setInterval(() => {
-        if (!client.isReady()) return;
-        runReminders(client).catch(error => {
-            console.error("[TICKET] Erinnerungsfehler:", error);
-        });
-    }, REMINDER_CHECK_INTERVAL);
-
-    client.once("clientReady", () => {
-        runReminders(client).catch(error => console.error("[TICKET] Startprüfung:", error));
-    });
-    if (client.isReady()) {
-        runReminders(client).catch(error => console.error("[TICKET] Startprüfung:", error));
-    }
-    initialized = true;
-    console.log("✅ Vexo RP Ticketsystem initialisiert (/ticketsystem, /immobilienpanel, /ticketsetup).");
-}
-
-// =====================================================
-// EXPORTS
-// =====================================================
-
-module.exports = {
-    initializeTicketSystem,
-    createTicket,
-    describeFailure,
-    TICKET_TYPES,
-    DISCORD_CATEGORIES,
-    ROLES,
-    ROLE_GROUPS
-};
+module.exports={initializeTicketSystem,createTicket,describeFailure,TICKET_TYPES,DISCORD_CATEGORIES,ROLES,ROLE_GROUPS};

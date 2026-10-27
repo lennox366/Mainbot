@@ -1,5 +1,5 @@
 // =====================================================
-// 🏴 GANG-SYSTEM (Vexo RP)
+// 🏴 GANG-SYSTEM (NoVex RP)
 // =====================================================
 //
 // Eigenständiges, in sich geschlossenes Modul für das
@@ -63,7 +63,7 @@ const {
 // KONFIGURATION / FARBEN
 // =====================================================
 
-const GANG_COLOR_PRIMARY = 0x8b5cf6; // Lila – Vexo RP-Akzent
+const GANG_COLOR_PRIMARY = 0x8b5cf6; // Lila – NoVex RP-Akzent
 const GANG_COLOR_SUCCESS = 0x57F287;
 const GANG_COLOR_DANGER  = 0xED4245;
 const GANG_COLOR_WARNING = 0xFEE75C;
@@ -551,7 +551,7 @@ function initializeGangSystem(client, options = {}) {
                 "✏️ **Gang ändern** – bestehende Gang bearbeiten\n" +
                 "🗑️ **Gang löschen** – bestehende Gang entfernen"
             )
-            .setFooter({ text: "Vexo RP • Gang-System" })
+            .setFooter({ text: "NoVex RP • Gang-System" })
             .setTimestamp();
 
         const row = new ActionRowBuilder().addComponents(

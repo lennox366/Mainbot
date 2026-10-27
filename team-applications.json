@@ -157,39 +157,13 @@
     "1559659266737176699:1322191083303731201": {
       "guildId": "1559659266737176699",
       "userId": "1322191083303731201",
-      "teamApplicationPanelChannelId": "1559659270864113742",
-      "status": "accepted",
-      "currentQuestion": 20,
-      "answers": [
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test",
-        "Test"
-      ],
-      "startedAt": "2026-10-22T16:00:14.374Z",
-      "submittedAt": "2026-10-22T16:00:55.942Z",
-      "decision": "accepted",
-      "reviewChannelId": "1559659273351602287",
-      "reviewMessageId": "1562858303162290189",
-      "teamRolesAssigned": true,
-      "decisionBy": "1322191083303731201",
-      "decidedAt": "2026-10-22T16:01:07.005Z"
+      "teamApplicationPanelChannelId": "1563988071056285758",
+      "status": "awaiting_acceptance",
+      "currentQuestion": 0,
+      "answers": [],
+      "startedAt": "2026-10-26T06:24:42.401Z",
+      "submittedAt": null,
+      "decision": null
     },
     "1559659266737176699:1345476764704440330": {
       "guildId": "1559659266737176699",
@@ -322,11 +296,19 @@
       {
         "channelId": "1559659273351602287",
         "messageId": "1563496281354276877"
+      },
+      {
+        "channelId": "1563979720041697491",
+        "messageId": "1564162728673804299"
+      },
+      {
+        "channelId": "1563988071056285758",
+        "messageId": "1564162825537196104"
       }
     ]
   },
   "teamApplicationChannelIds": {
     "1510593847972073653": "1545763477560369202",
-    "1559659266737176699": "1559659273351602287"
+    "1559659266737176699": "1563988071056285758"
   }
 }

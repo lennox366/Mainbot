@@ -70,6 +70,34 @@
       "messageId": "1563209565640589322",
       "createdAt": "2026-10-23T15:16:43.327Z",
       "updatedAt": "2026-10-23T15:16:49.874Z"
+    },
+    {
+      "id": "6",
+      "guildId": "1559659266737176699",
+      "userId": "1322191083303731201",
+      "userTag": "lennox.dev",
+      "task": ".",
+      "status": "rejected",
+      "developerResponse": null,
+      "rejectReason": "d",
+      "channelId": "1564015188326224023",
+      "messageId": "1564183345984962624",
+      "createdAt": "2026-10-26T07:46:12.491Z",
+      "updatedAt": "2026-10-26T07:46:19.325Z"
+    },
+    {
+      "id": "7",
+      "guildId": "1559659266737176699",
+      "userId": "1415714394024706048",
+      "userTag": "king.erdem",
+      "task": "Also ein system mit /close bei tickets",
+      "status": "open",
+      "developerResponse": null,
+      "rejectReason": null,
+      "channelId": "1564015188326224023",
+      "messageId": "1564183347683528785",
+      "createdAt": "2026-10-26T07:46:12.832Z",
+      "updatedAt": "2026-10-26T07:46:13.219Z"
     }
   ],
   "channelId": null,
@@ -78,8 +106,8 @@
       "channelId": "1545836537151889428"
     },
     "1559659266737176699": {
-      "channelId": "1559659274530062341"
+      "channelId": "1564015188326224023"
     }
   },
-  "counter": 5
+  "counter": 7
 }

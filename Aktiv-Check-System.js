@@ -1,12 +1,12 @@
 "use strict";
-// Vexo RP Aktiv-Check | Discord.js v14 | Node.js >= 18
+// NoVex RP Aktiv-Check | Discord.js v14 | Node.js >= 18
 const fs = require('fs');
 const path = require('path');
 const { EmbedBuilder, PermissionsBitField, MessageFlags } = require('discord.js');
 const FILE = path.join(__dirname, 'aktiv-check-data.json');
-const CHANNEL_ID = '1559659272009289798';
-const STAFF_ROLE_ID = '1559659267269595147';
-const TEAM_ONE_ROLE_ID = '1539989971820216400'; // Team-One-Rolle: ID auf deinem Server prüfen
+const CHANNEL_ID = '1564329375724208138';
+const STAFF_ROLE_ID = '1564307287068123186';
+const TEAM_ONE_ROLE_ID = '1564307287068123186'; // Team-One-Rolle: ID auf deinem Server prüfen
 const DURATION = 2 * 60 * 60 * 1000;
 const PENALTY = 14 * 24 * 60 * 60 * 1000;
 const ZONE = 'Europe/Berlin';
@@ -47,7 +47,7 @@ async function startCheck(guild, test = false) {
   const eligible = [...members.values()].filter(m=>!m.user.bot && m.roles.cache.has(STAFF_ROLE_ID)).map(m=>m.id);
   const now = Date.now();
   const embed = new EmbedBuilder().setColor(0x2787ff)
-    .setTitle(test ? '🧪 VEXO RP | AKTIV-CHECK TEST' : '💙 VEXO RP | WÖCHENTLICHER AKTIV-CHECK')
+    .setTitle(test ? '🧪 Novex RP | AKTIV-CHECK TEST' : '💙 Novex RP | WÖCHENTLICHER AKTIV-CHECK')
     .setDescription('**Team, zeigt eure Aktivität!**\n\nReagiere innerhalb von **2 Stunden** auf diese Nachricht mit **✅**.\n\nWer bis zum Ablauf nicht reagiert, erhält **Team One für 14 Tage**.\n\n⏳ **Ende:** <t:' + Math.floor((now+DURATION)/1000) + ':R>\n👥 **Teilnahmeberechtigte Teammitglieder:** ' + eligible.length + '\n\n*Nur die Reaktion direkt unter dieser Nachricht zählt.*')
     .setFooter({text:'Vexo RP • Automatischer Team-Aktivitätscheck'}).setTimestamp();
   const message = await channel.send({content:`<@&${STAFF_ROLE_ID}>`, allowedMentions:{roles:[STAFF_ROLE_ID]}, embeds:[embed]});

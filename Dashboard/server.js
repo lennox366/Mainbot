@@ -43,13 +43,20 @@ function getUserRole(userId) {
 
 app.use(express.json());
 app.use(session({
-    secret: SESSION_SECRET,
+    secret: SESSION_SECRET || "novex-dashboard-secret-key",
     resave: false,
     saveUninitialized: false,
     cookie: { httpOnly: true, secure: false, maxAge: 1000 * 60 * 60 * 24 }
 }));
 
 app.use(express.static(__dirname));
+
+// Demo-Benutzer für Testing (nur wenn kein OAuth konfiguriert ist)
+const DEMO_USERS = {
+    admin: { password: "admin123", role: "owner" },
+    mod: { password: "mod123", role: "moderator" },
+    viewer: { password: "view123", role: "viewer" }
+};
 
 // Auth Middleware
 function checkAuth(req, res, next) {
@@ -74,6 +81,41 @@ function checkRole(allowedRoles) {
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Login API (Demo + OAuth2)
+app.post("/api/login", async (req, res) => {
+    const { username, password } = req.body;
+    
+    // Demo-Modus für Testing
+    if (DEMO_USERS[username] && DEMO_USERS[username].password === password) {
+        const demoUser = {
+            id: "demo-" + username,
+            username: username,
+            role: DEMO_USERS[username].role
+        };
+        req.session.user = demoUser;
+        return res.json({ 
+            token: "demo-token-" + Date.now(),
+            user: demoUser 
+        });
+    }
+    
+    // OAuth2 wäre hier implementiert
+    return res.status(401).json({ error: "Ungültige Anmeldedaten" });
+});
+
+// Token-Verifizierung
+app.get("/api/verify", (req, res) => {
+    if (!req.session.user) {
+        return res.status(401).json({ error: "Nicht angemeldet" });
+    }
+    res.json({ user: req.session.user });
+});
+
+// Logout
+app.post("/api/logout", (req, res) => {
+    req.session.destroy(() => res.json({ success: true }));
 });
 
 // OAuth2 Login
@@ -153,6 +195,82 @@ app.get("/api/me", (req, res) => {
     // Live Rolle anhängen
     req.session.user.role = getUserRole(req.session.user.id);
     res.json({ loggedIn: true, user: req.session.user });
+});
+
+// Bot-Statistiken API
+app.get("/api/bot/stats", checkAuth, (req, res) => {
+    const client = global.dashboardClient;
+    if (!client || !client.isReady()) {
+        return res.status(503).json({ error: "Bot nicht bereit" });
+    }
+    
+    const stats = {
+        online: true,
+        username: client.user.username,
+        discriminator: client.user.discriminator,
+        guilds: client.guilds.cache.size,
+        totalMembers: client.guilds.cache.reduce((sum, guild) => sum + guild.memberCount, 0),
+        ping: client.ws.ping,
+        uptime: client.uptime,
+        readyAt: client.readyAt
+    };
+    
+    res.json(stats);
+});
+
+// Ticket-System API
+app.get("/api/tickets", checkAuth, (req, res) => {
+    const client = global.dashboardClient;
+    if (!client || !client.isReady()) {
+        return res.status(503).json({ error: "Bot nicht bereit" });
+    }
+    
+    try {
+        const ticketData = require("../Ticket-Daten.json");
+        const tickets = Object.values(ticketData.tickets || {}).map(ticket => ({
+            id: ticket.channelId,
+            type: ticket.type,
+            userId: ticket.userId,
+            status: ticket.status,
+            createdAt: ticket.createdAt
+        }));
+        
+        res.json({ tickets });
+    } catch (error) {
+        res.status(500).json({ error: "Ticket-Daten konnten nicht geladen werden" });
+    }
+});
+
+// Team-Statistiken API
+app.get("/api/team/stats", checkAuth, (req, res) => {
+    const client = global.dashboardClient;
+    if (!client || !client.isReady()) {
+        return res.status(503).json({ error: "Bot nicht bereit" });
+    }
+    
+    try {
+        const teamRolesConfig = require("../team-roles-config.json");
+        const staffRoleId = teamRolesConfig.staffRoleId;
+        
+        let totalStaff = 0;
+        let onlineStaff = 0;
+        
+        client.guilds.cache.forEach(guild => {
+            const staffRole = guild.roles.cache.get(staffRoleId);
+            if (staffRole) {
+                totalStaff += staffRole.members.size;
+                onlineStaff += staffRole.members.filter(m => m.presence?.status === 'online').size;
+            }
+        });
+        
+        res.json({
+            totalStaff,
+            onlineStaff,
+            offlineStaff: totalStaff - onlineStaff
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Team-Statistiken konnten nicht geladen werden" });
+    }
 });
 
 app.get("/api/status", (req, res) => {

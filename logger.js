@@ -2,7 +2,7 @@
 // 🤖 ZENTRALES LOG-SYSTEM
 // =====================================================
 //
-// Zentrales Log-System für den Vexo RP Bot
+// Zentrales Log-System für den NoVex RP Bot
 // Loggt alle wichtigen Aktionen, Commands, Events und Fehler
 // =====================================================
 
@@ -153,7 +153,7 @@ async function log({
             .setColor(color)
             .setTitle(`${symbol} ${action}`)
             .setTimestamp()
-            .setFooter({ text: "Vexo RP Bot • Log-System" });
+            .setFooter({ text: "NoVex RP Bot • Log-System" });
 
         // Felder hinzufügen
         const fields = [];

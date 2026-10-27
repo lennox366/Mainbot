@@ -1,5 +1,5 @@
 'use strict';
-// Vexo RP | Discord.js v14 | Node.js 18+
+// NoVex RP | Discord.js v14 | Node.js 18+
 // In index.js: const { registerRobloxSystem, robloxCommands } = require('./Roblox-Namen-System');
 // Vor client.login(...): registerRobloxSystem(client);
 // Slash-Definitionen robloxCommands zu deiner vorhandenen Slash-Registrierung hinzufügen.
@@ -13,9 +13,9 @@ const {
 } = require('discord.js');
 
 const DB_FILE = path.join(__dirname, 'roblox-namen.json');
-const PANEL_BUTTON = 'vexo_roblox_register';
-const MODAL_ID = 'vexo_roblox_register_modal';
-const INPUT_ID = 'vexo_roblox_username';
+const PANEL_BUTTON = 'Novex_roblox_register';
+const MODAL_ID = 'Novex_roblox_register_modal';
+const INPUT_ID = 'Novex_roblox_username';
 const LIMIT = 20;
 const TIMEOUT = 12000;
 
@@ -69,7 +69,7 @@ function listEmbed(guild) {
   }
   if (shown < entries.length) description += `\n\n… und ${entries.length - shown} weitere Einträge.`;
   return new EmbedBuilder().setColor(0x5865F2)
-    .setTitle('🎮 Vexo RP | Roblox-Namen-Liste')
+    .setTitle('🎮 Novex RP | Roblox-Namen-Liste')
     .setDescription(description)
     .setFooter({ text: `${entries.length} registrierte Mitglieder • Automatische Aktualisierung` })
     .setTimestamp();
@@ -111,8 +111,8 @@ async function robloxLookup(username) {
   }
 }
 function registerRobloxSystem(client) {
-  if (client.__vexoRobloxSystemRegistered) return;
-  client.__vexoRobloxSystemRegistered = true;
+  if (client.__NovexRobloxSystemRegistered) return;
+  client.__NovexRobloxSystemRegistered = true;
   client.on('interactionCreate', async interaction => {
     try {
       if (interaction.isChatInputCommand() && ['roblox-panel', 'roblox-namen-liste'].includes(interaction.commandName)) {
@@ -124,7 +124,7 @@ function registerRobloxSystem(client) {
         }
         if (interaction.commandName === 'roblox-panel') {
           const embed = new EmbedBuilder().setColor(0x00A2FF)
-            .setTitle('🎮 Vexo RP | Roblox-Namen eintragen')
+            .setTitle('🎮 NovexRP | Roblox-Namen eintragen')
             .setDescription('Klicke auf den Button und gib **deinen Roblox-Username** ein. Anzeigename und Roblox-ID werden automatisch über Roblox gesucht.');
           const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId(PANEL_BUTTON).setLabel('Roblox-Namen eintragen')

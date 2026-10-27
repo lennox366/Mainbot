@@ -1,5 +1,5 @@
 // =====================================================
-// 🎬 ENTERTAINMENT-SYSTEM (Vexo RP)
+// 🎬 ENTERTAINMENT-SYSTEM (NoVex RP)
 // =====================================================
 //
 // Eigenständiges, in sich geschlossenes Modul für das
@@ -50,7 +50,7 @@ const {
 // KONFIGURATION / FARBEN
 // =====================================================
 
-const ENT_COLOR_PRIMARY = 0x8b5cf6; // Lila – Vexo RP-Akzent
+const ENT_COLOR_PRIMARY = 0x8b5cf6; // Lila – NoVex RP-Akzent
 const ENT_COLOR_SUCCESS = 0x57F287;
 const ENT_COLOR_DANGER  = 0xED4245;
 const ENT_COLOR_WARNING = 0xFEE75C;

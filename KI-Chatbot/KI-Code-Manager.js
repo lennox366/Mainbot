@@ -1,6 +1,6 @@
 
 'use strict';
-// Vexo RP – KI-Code-Manager (Discord.js v14)
+// NoVex RP – KI-Code-Manager (Discord.js v14)
 // Erst Vorschlag, dann "Okay, mach das", Button und privates Passwort.
 const fs = require('node:fs');
 const path = require('node:path');

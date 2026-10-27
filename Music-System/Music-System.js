@@ -82,7 +82,7 @@ const QUEUE_DISPLAY_LIMIT = 10;
 
 const NEXORA_COLOR = 0x8B5CF6;
 const NEXORA_ERROR_COLOR = 0xED4245;
-const NEXORA_FOOTER = "Vexo RP • Music System";
+const NEXORA_FOOTER = "NoVex RP • Music System";
 
 const MUSIC_COMMAND_NAMES = new Set([
     "play",

@@ -9,8 +9,8 @@ const {
     PermissionFlagsBits
 } = require("discord.js");
 
-const WAITING_VOICE_CHANNEL_ID = "1559659271329808421";
-const SUPPORT_PINGS_CHANNEL_ID = "1559659271329808420";
+const WAITING_VOICE_CHANNEL_ID = "1563966885635035176";
+const SUPPORT_PINGS_CHANNEL_ID = "1563980823030407188";
 const SUPPORT_LOG_CHANNEL_ID = process.env.SUPPORT_LOG_CHANNEL_ID?.trim() || "1559659271329808420";
 const SUPPORT_PING_ROLE_ID = "1559659267219390595";
 const SUPPORT_STATE_FILE = path.join(__dirname, "..", "support-tickets.json");
@@ -137,7 +137,7 @@ function createTicketEmbed(ticket, status) {
 
     const embed = new EmbedBuilder()
         .setColor(color)
-        .setTitle("🎧 V E X O  R P • S U P P O R T")
+        .setTitle("🎧 N O V E X  R P • S U P P O R T")
         .setDescription(`━━━━━━━━━━━━━━━━━━━━\n${accepted ? "🟢" : closed ? "🔴" : "🟡"} **${statusText}**\n━━━━━━━━━━━━━━━━━━━━`)
         .addFields(
             { name: "👤 Bürger", value: `<@${ticket.userId}>`, inline: false },
@@ -420,6 +420,18 @@ function initializeSupportSystem(client) {
                     ticket.supportChannelId = null;
                     saveSupportTickets(tickets);
                     throw error;
+                }
+
+                // Nur erfolgreiche Support-Ping-Übernahmen zählen.
+                // Die Nachrichten-ID verhindert doppelte Punkte für denselben Ping.
+                try {
+                    if (typeof global.recordSupportPingTakeover === "function") {
+                        global.recordSupportPingTakeover(guildId, interaction.user.id, ticket.messageId);
+                    } else {
+                        console.warn("Support-Leaderboard: Statistik-Funktion in index.js nicht gefunden.");
+                    }
+                } catch (statsError) {
+                    console.error("Support-Leaderboard: Übernahme konnte nicht gezählt werden:", statsError);
                 }
 
                 await logSupportAction(interaction, ticket, action);

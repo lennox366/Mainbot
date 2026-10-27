@@ -102,5 +102,19 @@
     "supportChannelId": null,
     "closedAt": null,
     "blockedCallChannelIds": []
+  },
+  "1559659266737176699:1550576267034886266": {
+    "guildId": "1559659266737176699",
+    "userId": "1550576267034886266",
+    "waitChannelId": "1563966885635035176",
+    "messageId": "1564162242520420427",
+    "textChannelId": "1563980823030407188",
+    "status": "open",
+    "createdAt": "2026-10-26T06:22:21.025Z",
+    "acceptedById": null,
+    "acceptedAt": null,
+    "supportChannelId": null,
+    "closedAt": null,
+    "blockedCallChannelIds": []
   }
 }

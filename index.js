@@ -198,7 +198,7 @@ const {
 
 const PREFIX = "!";
 
-const SERVER_NAME = "Vexo RP";
+const SERVER_NAME = "Novex RP";
 
 const BOT_SETTINGS_FILE =
     path.join(
@@ -229,7 +229,7 @@ const CLIENT_ID_1 = "1540470358606610632";
 const CLIENT_ID_2 = "1540470358606610632";
 
 
-const ADMIN_USER_ID = "1559659267408134198";
+const ADMIN_USER_ID = "1563966304246046910";
 const BOT_OWNER_ID = "1322191083303731201";
 
 // =====================================================
@@ -247,10 +247,7 @@ const AUTHORIZED_ROLE_IDS = [
     "1559659267349553265"  // ━━Managment━━
 ];
 
-function hasSlashCommandPermission(member) {
-    if (!member) return false;
-    return member.roles.cache.some(role => AUTHORIZED_ROLE_IDS.includes(role.id));
-}
+// Die zentrale hasSlashCommandPermission-Funktion steht im Abschnitt BERECHTIGUNGEN.
 
 // =====================================================
 // RP STATUS SYSTEM
@@ -330,55 +327,52 @@ function setupNametagsFromRoles() {
         let added = 0;
         for (const category of teamRolesConfig.roleHierarchy || []) {
             for (const role of category.roles || []) {
-                // Individuelle Kürzel aus nametag-config.json niemals überschreiben.
+                // Nur hinzufügen, wenn die Rolle noch kein Kürzel hat
+                // Manuelle Kürzel aus nametag-config.json werden NIEMALS überschrieben
                 if (!Object.prototype.hasOwnProperty.call(nametagConfig.roleIdToTag, role.id)) {
                     nametagConfig.roleIdToTag[role.id] = category.category;
                     added++;
                 }
             }
         }
-        if (added > 0) saveNametagConfig();
-        console.log(`✅ Nametags geladen; ${added} fehlende Rollen ergänzt (eigene Kürzel bleiben erhalten).`);
+        if (added > 0) {
+            saveNametagConfig();
+            console.log(`✅ Nametags geladen; ${added} fehlende Rollen ergänzt (manuelle Kürzel bleiben erhalten).`);
+        } else {
+            console.log(`✅ Nametags geladen; alle Rollen bereits konfiguriert.`);
+        }
     } catch (error) {
         console.error("❌ Fehler beim Einrichten der Nametags:", error);
     }
 }
 
+// Erstelle eine Position-Map basierend auf team-roles-config.json
+const rolePositionMap = new Map();
+
+function buildRolePositionMap() {
+    try {
+        const teamRolesConfig = require("./team-roles-config.json");
+        rolePositionMap.clear();
+        
+        for (const category of teamRolesConfig.roleHierarchy || []) {
+            for (const role of category.roles || []) {
+                // Verwende die interne Position aus team-roles-config.json
+                rolePositionMap.set(role.id, role.position);
+            }
+        }
+        console.log(`✅ Rollen-Positions-Map erstellt mit ${rolePositionMap.size} Rollen.`);
+    } catch (error) {
+        console.error("❌ Fehler beim Erstellen der Rollen-Positions-Map:", error);
+    }
+}
+
 // Rufe beim Start auf
 setupNametagsFromRoles();
+buildRolePositionMap();
 
-function updateMemberNametag(member) {
-    if (!nametagConfig.enabled) return;
-
-    try {
-        // Finde die höchste Rolle mit einem Nametag
-        let tagPrefix = "";
-        let highestPosition = -1;
-
-        for (const [roleId, prefix] of Object.entries(nametagConfig.roleIdToTag)) {
-            const role = member.roles.cache.get(roleId);
-            if (role && role.position > highestPosition) {
-                highestPosition = role.position;
-                tagPrefix = prefix;
-            }
-        }
-
-        if (tagPrefix) {
-            const originalName = member.user.username;
-            const newNickname = tagPrefix + " " + originalName;
-
-            if (member.nickname !== newNickname) {
-                member.setNickname(newNickname).catch(error => {
-                    if (error.code !== 50013) { // Ignore missing permissions
-                        console.error(`❌ Fehler beim Setzen des Nametags für ${member.user.username}:`, error);
-                    }
-                });
-            }
-
-        }
-    } catch (error) {
-        console.error("❌ Fehler beim Aktualisieren des Nametags:", error);
-    }
+// Einheitlicher Nametag-Sync: wird von allen bestehenden Aufrufstellen genutzt.
+async function updateMemberNametag(member) {
+    return syncNickname(member);
 }
 
 // =====================================================
@@ -865,15 +859,15 @@ function createBotAvatarPanel(guildId) {
 // LOG-KANÄLE
 // =====================================================
 
-const JOIN_LOG_CHANNEL_ID = "1539990032469991444";
-const LEFT_LOG_CHANNEL_ID = "1539990033744789514";
-const MODERATION_LOG_CHANNEL_ID = "1539990036945182810";
-const BOT_LOG_CHANNEL_ID = "1539990045174267964";
-const SECURITY_LOG_CHANNEL_ID = "1539990046705324052";
-const EDIT_LOG_CHANNEL_ID = "1539990050962538657";
-const WELCOME_CHANNEL_ID = "1559659268175826953";
-const DISCORD_RULES_CHANNEL_ID = "1560736136304009257";
-const IC_RULES_CHANNEL_ID = "1559659268494327931";
+const JOIN_LOG_CHANNEL_ID = "1564325933890932856";
+const LEFT_LOG_CHANNEL_ID = "1564326001390129182";
+const MODERATION_LOG_CHANNEL_ID = "1564326036617830612";
+const BOT_LOG_CHANNEL_ID = "1564326071514570885";
+const SECURITY_LOG_CHANNEL_ID = "1564326145392910336";
+const EDIT_LOG_CHANNEL_ID = "1564326174564548648";
+const WELCOME_CHANNEL_ID = "1564307565385490583";
+const DISCORD_RULES_CHANNEL_ID = "1564326323608887457";
+const IC_RULES_CHANNEL_ID = "1564326323608887457";
 
 // =====================================================
 // RP-PANEL
@@ -1729,32 +1723,23 @@ const TEAM_NICKNAME_ROLES = [
 
 function getConfiguredTeamNicknameRoles() {
     try {
-        const configPath = path.join(__dirname, "team-roles-config.json");
-        if (!fs.existsSync(configPath)) {
-            return [];
-        }
-
-        const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
-        const categories = Array.isArray(config.roleHierarchy)
-            ? config.roleHierarchy
-            : [];
-
-        return categories.flatMap(category =>
-            (Array.isArray(category.roles) ? category.roles : [])
-                .filter(role =>
-                    typeof role.id === "string" &&
-                    typeof role.name === "string" &&
-                    !role.name.includes("━")
-                )
-                .map(role => ({
-                    roleId: role.id,
-                    label: role.name.match(/^\[([^\]]+)\]/)?.[1] ||
-                        role.name.replace(/^[《\s]+|[》\s]+$/g, "").trim(),
-                    roleName: role.name
-                }))
+        const config = JSON.parse(fs.readFileSync(path.join(__dirname, "team-roles-config.json"), "utf8"));
+        const tags = JSON.parse(fs.readFileSync(path.join(__dirname, "nametag-config.json"), "utf8"));
+        if (tags.enabled === false) return [];
+        return (config.roleHierarchy || []).flatMap(category =>
+            (category.roles || []).filter(role =>
+                typeof role.id === "string" &&
+                typeof tags.roleIdToTag?.[role.id] === "string" &&
+                tags.roleIdToTag[role.id].trim()
+            ).map(role => ({
+                roleId: role.id,
+                label: tags.roleIdToTag[role.id].trim(),
+                roleName: role.name,
+                position: Number(role.position)
+            }))
         );
     } catch (error) {
-        console.error("❌ Fehler beim Laden der Teamrollen-Konfiguration:", error);
+        console.error("❌ Nametag-Rollenkonfiguration konnte nicht geladen werden:", error);
         return [];
     }
 }
@@ -1762,15 +1747,12 @@ function getConfiguredTeamNicknameRoles() {
 const CONFIGURED_TEAM_NICKNAME_ROLES = getConfiguredTeamNicknameRoles();
 
 function getAllTeamNicknameRoles() {
-    const rolesById = new Map();
-
-    for (const entry of [...TEAM_NICKNAME_ROLES, ...CONFIGURED_TEAM_NICKNAME_ROLES]) {
-        if (!rolesById.has(entry.roleId)) {
-            rolesById.set(entry.roleId, entry);
-        }
-    }
-
-    return [...rolesById.values()];
+    // Ausschließlich die aktuelle Novex-RP-Konfiguration verwenden.
+    // Kleinere Positionsnummer bedeutet höheren Rang.
+    return CONFIGURED_TEAM_NICKNAME_ROLES.filter(entry =>
+        rolePositionMap.has(entry.roleId) &&
+        entry.roleId !== "1563966385128874055"
+    ).sort((a, b) => rolePositionMap.get(a.roleId) - rolePositionMap.get(b.roleId));
 }
 
 // Zusätzliche Rollen, die ebenfalls automatisch einen festen
@@ -1957,7 +1939,7 @@ function getActiveWarns(guildId, userId) {
 // Rolle, die alle Teammitglieder (unabhängig vom Rang) erhalten und
 // die für die Zählung "Teammitglieder gesamt" in !teamstatistik
 // verwendet wird.
-const TEAMSTATISTIK_ROLE_ID = "1539991280396935219";
+const TEAMSTATISTIK_ROLE_ID = "1564307287068123186";
 
 // Speichert den jeweils letzten Up-Rank pro Mitglied, damit dieser in
 // !teamstatistik angezeigt werden kann. Wird ausschließlich beim
@@ -2403,23 +2385,11 @@ startDashboard(client);
 // =====================================================
 
 function isBotOwner(member) {
-    return member?.id === BOT_OWNER_ID;
+    return Boolean(member && (member.id === BOT_OWNER_ID || member.user?.id === BOT_OWNER_ID));
 }
 
-function hasSlashCommandPermission(interaction) {
-    const roles = interaction.member?.roles;
-    const hasRole = roleId =>
-        roles?.cache?.has(roleId) === true ||
-        (Array.isArray(roles) && roles.includes(roleId));
-
-    return (
-        interaction.user?.id === BOT_OWNER_ID ||
-        interaction.user?.id === interaction.guild?.ownerId ||
-        hasRole(TEAM_ROLES.Founder) ||
-        hasRole(TEAM_ROLES.Owner) ||
-        hasRole(TEAM_ROLES["Co-Owner"]) ||
-        hasRole(DEV_ROLE_ID)
-    );
+function hasSlashCommandPermission(memberOrInteraction) {
+    return hasNovexCommandPermission(memberOrInteraction);
 }
 
 function hasRestartPermission(member) {
@@ -2440,17 +2410,27 @@ function hasNameTagSetPermission(member) {
     );
 }
 
+// Nur diese konkrete Rolle und der Bot-Owner dürfen geschützte Slash-Commands nutzen.
+const NOVEX_COMMAND_ROLE_ID = "1563966304246046910";
+function hasNovexCommandPermission(memberOrInteraction) {
+    if (!memberOrInteraction) return false;
+    const interaction = memberOrInteraction.user && memberOrInteraction.member
+        ? memberOrInteraction : null;
+    const member = interaction ? interaction.member : memberOrInteraction;
+    const userId = interaction?.user?.id || member?.user?.id || member?.id;
+    if (userId === BOT_OWNER_ID) return true;
+    const roles = member?.roles;
+    if (roles?.cache?.has) return roles.cache.has(NOVEX_COMMAND_ROLE_ID);
+    if (Array.isArray(roles)) return roles.includes(NOVEX_COMMAND_ROLE_ID);
+    return false;
+}
+
 function hasUprankDownrankPermission(member) {
-    return hasTeamPermission(member);
+    return hasNovexCommandPermission(member);
 }
 
 function hasProtectedCommandPermission(member) {
-    return (
-        isBotOwner(member) ||
-        member?.permissions?.has(
-            PermissionsBitField.Flags.Administrator
-        )
-    );
+    return hasNovexCommandPermission(member);
 }
 
 function hasTeamPermission(member) {
@@ -2537,8 +2517,8 @@ function createTeamRoleSelectionPayload(guild, target, action, requestedPage = 0
     const pageSize = 25;
     const pageCount = Math.max(1, Math.ceil(roles.length / pageSize));
     const page = Math.min(Math.max(requestedPage, 0), pageCount - 1);
-    const prefix = action === "uprank" ? "team_uprank_role_" : "team_degrade_role_";
-    const pagePrefix = action === "uprank" ? "team_uprank_page_" : "team_degrade_page_";
+    const prefix = action === "join" ? "team_join_role_" : action === "uprank" ? "team_uprank_role_" : "team_degrade_role_";
+    const pagePrefix = action === "join" ? "team_join_page_" : action === "uprank" ? "team_uprank_page_" : "team_degrade_page_";
     const options = roles
         .slice(page * pageSize, (page + 1) * pageSize)
         .map(entry =>
@@ -3424,74 +3404,67 @@ function getHighestNicknameRoleEntry(member) {
     return null;
 }
 
-async function syncNickname(
-    member,
-    onError
-) {
-    try {
-        if (
-            !member ||
-            !member.guild ||
-            !member.user
-        ) {
-            return false;
-        }
+const managedNicknameBase = new Map();
+const nicknameSyncInProgress = new Set();
 
-        const matchedEntry =
-            getHighestNicknameRoleEntry(
-                member
-            );
-
-        if (matchedEntry) {
-            const desiredNickname =
-                matchedEntry.buildNickname(
-                    member.user.username
-                );
-            const boundedNickname =
-                Array.from(desiredNickname)
-                    .slice(0, 32)
-                    .join("");
-
-            if (
-                member.nickname ===
-                boundedNickname
-            ) {
-                return false;
+function stripManagedTeamTag(name) {
+    let result = String(name || "");
+    const labels = [...new Set([
+        ...getAllTeamNicknameRoles().map(entry => entry.label),
+        ...TEAM_NICKNAME_ROLES.map(entry => entry.label)
+    ])].sort((a, b) => b.length - a.length);
+    for (let i = 0; i < 3; i++) {
+        const before = result;
+        for (const label of labels) {
+            for (const prefix of [`${label} x `, `${label} `, `[${label}] `]) {
+                if (result.startsWith(prefix)) {
+                    result = result.slice(prefix.length);
+                    break;
+                }
             }
+            if (before !== result) break;
+        }
+        if (before === result) break;
+    }
+    return result.trim();
+}
 
-            await member.setNickname(
-                boundedNickname,
-                `Nickname (${matchedEntry.label}) gesetzt`
-            );
-
+async function syncNickname(member, onError) {
+    if (!member?.guild || !member.user || nicknameSyncInProgress.has(member.id)) return false;
+    nicknameSyncInProgress.add(member.id);
+    try {
+        const teamEntry = getAllTeamNicknameRoles().find(entry => member.roles.cache.has(entry.roleId));
+        const currentName = member.nickname || member.user.username;
+        // Verwende globalName falls vorhanden, sonst username
+        const displayName = member.user.globalName || member.user.username;
+        const baseName = managedNicknameBase.get(`${member.guild.id}:${member.id}`) ||
+            stripManagedTeamTag(currentName) || displayName;
+        if (teamEntry) {
+            const key = `${member.guild.id}:${member.id}`;
+            if (!managedNicknameBase.has(key)) managedNicknameBase.set(key, baseName);
+            // Neues Format: [RANG] Name
+            const prefix = teamEntry.label;
+            const desired = prefix + " " + Array.from(baseName).slice(0, Math.max(0, 32 - Array.from(prefix).length - 1)).join("");
+            if (member.nickname === desired) return false;
+            await member.setNickname(desired, `NoVex RP Nametag: ${teamEntry.label}`);
             return true;
         }
-
-        // Keine der Rollen (mehr) vorhanden: alten, von diesem
-        // System gesetzten Nametag wieder entfernen und normalen
-        // Namen wiederherstellen.
-        if (
-            nicknameHasManagedPrefix(
-                member.nickname
-            )
-        ) {
-            await member.setNickname(
-                null,
-                "Nickname entfernt"
-            );
-
-            return true;
+        const key = `${member.guild.id}:${member.id}`;
+        if (managedNicknameBase.has(key) || stripManagedTeamTag(currentName) !== currentName) {
+            managedNicknameBase.delete(key);
+            const desired = baseName === displayName ? null : baseName.slice(0, 32);
+            if (member.nickname !== desired) {
+                await member.setNickname(desired, "NoVex RP Nametag entfernt");
+                return true;
+            }
         }
-
         return false;
-
     } catch (error) {
-        console.error(
-            `❌ Nickname konnte für Mitglied ${member?.id || "unbekannt"} nicht aktualisiert werden:`,
-            error
-        );
+        console.error(`❌ Nametag für ${member?.id} fehlgeschlagen:`, error);
         onError?.(error);
         return false;
+    } finally {
+        nicknameSyncInProgress.delete(member.id);
     }
 }
 
@@ -6016,6 +5989,11 @@ function createTeamPanel() {
                     .setStyle(
                         ButtonStyle.Danger
                     )
+                ,new ButtonBuilder()
+                    .setCustomId("team_join")
+                    .setLabel("Team Join")
+                    .setEmoji("👥")
+                    .setStyle(ButtonStyle.Success)
             );
 
     const row3 =
@@ -6369,9 +6347,8 @@ client.on(
 
         // Keine Server-Beschränkung mehr - Bot geht auf allen Servern
 
-        await syncNickname(
-            member
-        );
+        // Einheitliches Nametag-System
+        await syncNickname(member);
 
         // =========================================
         // VERIFIZIERUNGS-PANEL AKTUALISIEREN
@@ -6630,21 +6607,11 @@ client.on(
         // =================================================
 
         const nicknameRelevantRolesChanged =
-            oldMember.roles.cache.has(DEV_ROLE_ID) !==
-                newMember.roles.cache.has(DEV_ROLE_ID) ||
-            (
-                getHighestNicknameRoleEntry(oldMember)?.roleId ||
-                null
-            ) !==
-            (
-                getHighestNicknameRoleEntry(newMember)?.roleId ||
-                null
-            );
+            getHighestNicknameRoleEntry(oldMember)?.roleId !==
+            getHighestNicknameRoleEntry(newMember)?.roleId;
 
         if (nicknameRelevantRolesChanged) {
-            await syncNickname(
-                newMember
-            );
+            await syncNickname(newMember);
         }
 
         // =================================================
@@ -6736,7 +6703,7 @@ client.on(
                     .setTimestamp()
                     .setFooter({
                         text:
-                            "Vexo RP ✧ 𝙑𝘾 • Edit Logs"
+                            "Novex RP ✧ 𝙑𝘾 • Edit Logs"
                     });
 
             await sendLog(
@@ -11483,6 +11450,10 @@ async function handleSupportLeaderboard(interaction) {
         .setTimestamp()] });
 }
 
+// Meeting-Calendar deaktiviert (Modul nicht vorhanden)
+// const { installMeetingCalendar } = require("./meeting-calendar");
+// installMeetingCalendar(client);
+
 const processedInteractions = new Set();
 
 client.on(
@@ -11490,7 +11461,21 @@ client.on(
     async interaction => {
 
         try {
+            // Früh prüfen, damit auch vorgezogene Command-Handler die Rollenregel beachten.
+            if (interaction.isChatInputCommand() && interaction.commandName !== "play" &&
+                !hasSlashCommandPermission(interaction)) {
+                interaction.__slashCommandPermissionDenied = true;
+                if (!interaction.replied && !interaction.deferred) {
+                    return interaction.reply({
+                        content: "❌ Nur die freigegebene Teamrolle und der Bot-Owner dürfen diesen Befehl verwenden.",
+                        flags: MessageFlags.Ephemeral
+                    });
+                }
+                return;
+            }
 
+            if ((interaction.isChatInputCommand() && interaction.commandName === "meeting") ||
+                (typeof interaction.customId === "string" && interaction.customId.startsWith("vxm:"))) return;
             if (await handleAktivCheckCommand(interaction)) return;
             if (interaction.isChatInputCommand() && interaction.commandName === "support-leaderboard") {
                 return await handleSupportLeaderboard(interaction);
@@ -11517,7 +11502,7 @@ client.on(
             // Permission-Check für Slash-Commands (nur autorisierte Rollen)
             if (interaction.isChatInputCommand()) {
                 const member = interaction.member;
-                if (!hasSlashCommandPermission(member)) {
+                if (interaction.commandName !== "play" && !hasSlashCommandPermission(interaction)) {
                     return interaction.reply({
                         content: "❌ Nur autorisierte Rollen dürfen Slash-Commands verwenden.",
                         flags: MessageFlags.Ephemeral
@@ -11763,7 +11748,7 @@ client.on(
             // SLASH COMMANDS
             // =====================================================
             if (interaction.isChatInputCommand()) {
-                if (!hasSlashCommandPermission(interaction)) {
+                if (interaction.commandName !== "play" && !hasSlashCommandPermission(interaction)) {
                     interaction.__slashCommandPermissionDenied = true;
                     return interaction.reply({
                         content: "❌ Slash-Commands können nur autorisierte Rollen verwenden.",
@@ -16306,12 +16291,14 @@ if (
                 if (
                     interaction.isButton() &&
                     (
+                        interaction.customId.startsWith("team_join_page_") ||
                         interaction.customId.startsWith("team_uprank_page_") ||
                         interaction.customId.startsWith("team_degrade_page_")
                     )
                 ) {
+                    const isJoin = interaction.customId.startsWith("team_join_page_");
                     const isUprank = interaction.customId.startsWith("team_uprank_page_");
-                    const prefix = isUprank ? "team_uprank_page_" : "team_degrade_page_";
+                    const prefix = isJoin ? "team_join_page_" : isUprank ? "team_uprank_page_" : "team_degrade_page_";
                     const pageData = interaction.customId.slice(prefix.length);
                     const separatorIndex = pageData.lastIndexOf("_");
                     if (separatorIndex <= 0) {
@@ -16322,7 +16309,7 @@ if (
 
                     const targetId = pageData.slice(0, separatorIndex);
                     const page = Number(pageData.slice(separatorIndex + 1));
-                    const action = isUprank ? "uprank" : "degrade";
+                    const action = isJoin ? "join" : isUprank ? "uprank" : "degrade";
 
                     if (
                         !Number.isInteger(page) ||
@@ -16348,6 +16335,8 @@ if (
                 }
 
                 const actions = {
+                    team_join:
+                        "join",
                     team_uprank:
                         "uprank",
                     team_warn:
@@ -16370,9 +16359,7 @@ if (
                 ) {
 
                     if (
-                        !hasTeamPermission(
-                            interaction.member
-                        )
+                        !(action === "join" ? hasNovexCommandPermission(interaction.member) : hasTeamPermission(interaction.member))
                     ) {
                         return interaction.reply({
                             content:
@@ -16436,7 +16423,7 @@ if (
                 const userId =
                     interaction.values[0];
 
-                if (action === "uprank" || action === "degrade") {
+                if (action === "join" || action === "uprank" || action === "degrade") {
                     if (!hasUprankDownrankPermission(interaction.member)) {
                         return interaction.reply(
                             errorMessage("Du hast dafür keine Berechtigung.")
@@ -16447,8 +16434,11 @@ if (
                     if (!target) {
                         return interaction.reply(errorMessage("Das ausgewählte Mitglied wurde nicht gefunden."));
                     }
-                    if (!hasConfiguredTeamRole(target)) {
+                    if (action !== "join" && !hasConfiguredTeamRole(target)) {
                         return interaction.reply(errorMessage("Uprank und Degradierung sind nur für Mitglieder mit einer konfigurierten Teamrolle möglich."));
+                    }
+                    if (target.id === interaction.user.id || target.id === interaction.guild.ownerId) {
+                        return interaction.reply(errorMessage("Du kannst diese Person nicht bearbeiten."));
                     }
 
                     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -16755,6 +16745,46 @@ if (
             }
 
             // =================================================
+            // NOVEX RP TEAM JOIN: Rolle + Serverteam-Zwischenrolle vergeben.
+            if (interaction.isStringSelectMenu() && interaction.customId.startsWith("team_join_role_")) {
+                if (!hasNovexCommandPermission(interaction.member)) {
+                    return interaction.reply({ content: "❌ Keine Berechtigung.", flags: MessageFlags.Ephemeral });
+                }
+                const targetId = interaction.customId.slice("team_join_role_".length);
+                const target = await interaction.guild.members.fetch(targetId).catch(() => null);
+                const roleId = interaction.values[0];
+                const selectedRole = interaction.guild.roles.cache.get(roleId);
+                const staffRole = interaction.guild.roles.cache.get("1563966385128874055");
+                const bot = await interaction.guild.members.fetchMe();
+                const executor = await interaction.guild.members.fetch(interaction.user.id);
+                if (!target || !selectedRole || !staffRole ||
+                    !getAllTeamNicknameRoles().some(entry => entry.roleId === roleId) ||
+                    target.id === executor.id || target.id === interaction.guild.ownerId ||
+                    hasConfiguredTeamRole(target)) {
+                    return interaction.reply({ content: "❌ Ungültige Auswahl oder Mitglied ist bereits im Team.", flags: MessageFlags.Ephemeral });
+                }
+                if (!bot.permissions.has(PermissionsBitField.Flags.ManageRoles) ||
+                    [selectedRole, staffRole].some(role => role.position >= bot.roles.highest.position) ||
+                    (!isBotOwner(executor) && executor.id !== interaction.guild.ownerId &&
+                     selectedRole.position >= executor.roles.highest.position)) {
+                    return interaction.reply({ content: "❌ Rollenberechtigung oder Rollenhierarchie reicht nicht aus.", flags: MessageFlags.Ephemeral });
+                }
+                await interaction.deferUpdate();
+                try {
+                    await target.roles.add([selectedRole.id, staffRole.id], `Novex RP Team Join durch ${interaction.user.tag}`);
+                    await updateMemberNametag(target);
+                    await updateTeamList(interaction.guild, TEAMLIST_AUTO_UPDATE_CHANNEL_ID).catch(() => {});
+                    const embed = new EmbedBuilder().setColor(0x57F287).setTitle("👥 TEAM JOIN")
+                        .setDescription(`Mitglied: ${target}\nRang: ${selectedRole}\nZwischenrolle: ${staffRole}\nDurch: ${interaction.user}`)
+                        .setTimestamp();
+                    await sendTeamManagementLog(interaction.guild, "rank", embed).catch(console.error);
+                    return interaction.editReply({ content: `✅ ${target} ist jetzt im Team: ${selectedRole} + ${staffRole}.`, components: [] });
+                } catch (error) {
+                    console.error("❌ Team Join fehlgeschlagen:", error);
+                    return interaction.editReply({ content: "❌ Team Join fehlgeschlagen. Prüfe Rollenberechtigungen.", components: [] });
+                }
+            }
+
             // UP-RANK / DEGRADIEREN – Schritt 2: Rolle gewählt,
             // Bestätigung anzeigen
             // =================================================
@@ -19526,7 +19556,7 @@ client.once("clientReady", async () => {
     // --- NEU: Backup-, Dashboard- und Logging-Modul starten ---
     // Die /backup-Befehle werden unten zusammen mit den eigenen Commands pro
     // Server registriert (NICHT global, sonst erscheinen sie doppelt).
-    const allSlashCommands = [...slashCommands, { name: "teamlistepanel", description: "Zeigt die automatische Vexo-RP-Teamliste mit Statuspunkten" }, ...robloxCommands, ...aktivCheckCommands, { name: "teambewerbung-test", description: "Fertige Testbewerbung mit Rollenping und Testbuttons senden" }, ...backupModule.commands, countingCommand, leaderboardCommand, supportLeaderboardCommand, akinatorCommand];
+    const allSlashCommands = [...slashCommands, { name: "teamlistepanel", description: "Zeigt die automatische Vexo-RP-Teamliste mit Statuspunkten" }, { name: "meeting", description: "Erstellt den VEXO RP Meeting-Kalender" }, ...robloxCommands, ...aktivCheckCommands, { name: "teambewerbung-test", description: "Fertige Testbewerbung mit Rollenping und Testbuttons senden" }, ...backupModule.commands, countingCommand, leaderboardCommand, supportLeaderboardCommand, akinatorCommand];
 
     try {
         global.__botCommandList = backupModule.commands.flatMap(c =>
@@ -19594,21 +19624,7 @@ if (!process.env.BOT_TOKEN) {
 }
 
 // =====================================================
-// NAMETAG EVENT HANDLER
-// =====================================================
-
-// Role Add Event - Wenn jemand eine Rolle bekommt
-client.on("guildMemberUpdate", (oldMember, newMember) => {
-    try {
-        // Prüfe ob Rollen hinzugefügt wurden
-        const addedRoles = newMember.roles.cache.filter(role => !oldMember.roles.cache.has(role.id));
-        if (addedRoles.size > 0) {
-            updateMemberNametag(newMember);
-        }
-    } catch (error) {
-        console.error("❌ Fehler im guildMemberUpdate Event:", error);
-    }
-});
+// Nametags werden bereits im zentralen guildMemberUpdate-Handler aktualisiert.
 
 client.login(
     process.env.BOT_TOKEN
@@ -19620,11 +19636,11 @@ client.login(
 const VEXO_STATS_GUILD_ID = "1559659266737176699";
 const VEXO_STATS_STAFF_ROLE_ID = "1559659267269595147";
 const VEXO_STATS_CHANNELS = {
-    members: "1560755261172482079",
-    boosts: "1560755267724124271",
-    bots: "1560755275818868866",
-    roles: "1561290265589710879",
-    team: "1563148080965226576"
+    members: "1564307553515606196",
+    boosts: "1564307564039118919",
+    bots: "1564307557474902017",
+    roles: "1564307566631198733",
+    team: "1564327917075562536"
 };
 let vexoStatsRunning = false;
 let vexoStatsPending = null;
@@ -19643,11 +19659,11 @@ async function updateVexoStatChannels() {
         const roles = guild.roles.cache.size;
         const team = guild.members.cache.filter(member => member.roles.cache.has(VEXO_STATS_STAFF_ROLE_ID)).size;
         const names = {
-            members: `『🧑』〆 ${members} Members`,
-            boosts: `『💎』〆 ${boosts} Boosts`,
-            bots: `『🤖』〆 ${bots} Bots`,
-            roles: `『💂』 〆 ${roles} Roles`,
-            team: `『🧑』〆 ${team} Teamlar`
+            members: `👤・Members: ${members} Members`,
+            boosts: `💎・Boosts: ${boosts} Boosts`,
+            bots: `🤖・Bots: ${bots} Bots`,
+            roles: `💂・Roles: ${roles} Roles`,
+            team: `👤・Team: ${team} Team`
         };
         for (const [key, id] of Object.entries(VEXO_STATS_CHANNELS)) {
             try {

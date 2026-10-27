@@ -2,7 +2,7 @@
 "use strict";
 
 // =====================================================
-// 🤖 VEXO RP – KI-CHAT
+// 🤖 NoVex RP – KI-CHAT
 // Datei: KI-Chatbot/KI-Chat.js
 // Mit integrierter KI-Bildanimation
 // =====================================================

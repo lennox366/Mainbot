@@ -198,7 +198,7 @@ const {
 
 const PREFIX = "!";
 
-const SERVER_NAME = "Vexo RP";
+const SERVER_NAME = "NoVex RP";
 
 const BOT_SETTINGS_FILE =
     path.join(
@@ -890,7 +890,7 @@ const RP_START_TITLE = "🚀 VEXO RP V1  •  CITY ONLINE";
 
 const RP_START_DESCRIPTION = [
     "### 🟢 DIE STADT IST JETZT GEÖFFNET",
-    "Willkommen zurück in **Vexo Roleplay**!",
+    "Willkommen zurück in **NoVex Roleplay**!",
     "Die Tore unserer Stadt sind geöffnet und ein neuer RP-Tag beginnt.",
     "",
     "━━━━━━━━━━━━━━━━━━━━",
@@ -917,7 +917,7 @@ const RP_STOP_TITLE = "🌙 VEXO RP V1  •  CITY OFFLINE";
 
 const RP_STOP_DESCRIPTION = [
     "### 🔴 DIE STADT SCHLIESST IHRE TORE",
-    "Ein weiterer RP-Tag in **Vexo Roleplay** geht zu Ende.",
+    "Ein weiterer RP-Tag in **NoVex Roleplay** geht zu Ende.",
     "",
     "━━━━━━━━━━━━━━━━━━━━",
     "### 📡 LIVE-SERVERSTATUS",
@@ -1104,7 +1104,7 @@ function createTeamApplicationPanel() {
             "Fülle das Bewerbungsformular vollständig und ehrlich aus.\n\n" +
             "Bitte beantworte alle Fragen sorgfältig."
         )
-        .setFooter({ text: "Vexo RP System ✧ Team-System" });
+        .setFooter({ text: "NoVex RP System ✧ Team-System" });
 
     return {
         embeds: [embed],
@@ -1306,7 +1306,7 @@ async function sendTeamApplicationTest(interaction) {
         .setColor(0xFF69B4)
         .setDescription("**Dies ist eine Testbewerbung – kein echter Bewerber.**\n\n👤 **Test-Bewerber**\n**Name:** Test-Bewerber\n**Username:** test_account\n**User-ID:** Keine (Test)\n**Bewerbung:** " + formatGermanTime(new Date()))
         .addFields(fields)
-        .setFooter({ text: "Vexo RP • Testmodus: keine echten Rollen oder Nachrichten an Bewerber" })
+        .setFooter({ text: "NoVex RP • Testmodus: keine echten Rollen oder Nachrichten an Bewerber" })
         .setTimestamp();
     const buttons = new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId("team_application_test:accept").setLabel("Annehmen (Test)").setStyle(ButtonStyle.Success),
@@ -2242,7 +2242,7 @@ const HOUSES_LIST_FILE_2 =
 // SERVER IDs FÜR DAS HÄUSERSYSTEM
 // =====================================================
 
-// Vexo RP
+// NoVex RP
 const HOUSE_SERVER_1_ID =
     "1510593847972073653";
 
@@ -2315,7 +2315,7 @@ const {
 
 initializeTicketSystem(client);
 
-console.log("🎫 Vexo RP Ticketsystem wurde gestartet.");
+console.log("🎫 NoVex RP Ticketsystem wurde gestartet.");
 
 
  // =====================================================
@@ -2352,15 +2352,15 @@ client.on("guildMemberRemove", async (member) => {
 
         const embed = new EmbedBuilder()
             .setColor(0x00BFFF)
-            .setTitle("👋 Tschüss! | Vexo RP")
+            .setTitle("👋 Tschüss! | NoVex RP")
             .setDescription(
-                `🌙 **Auf Wiedersehen bei Vexo RP!**\n\n` +
+                `🌙 **Auf Wiedersehen bei NoVex RP!**\n\n` +
                 `👋 **${user.username}** hat unseren Server verlassen.\n\n` +
                 `💔 Schade, dass du uns verlässt!\n` +
-                `Wir bedanken uns für deine Zeit bei Vexo RP und hoffen, ` +
+                `Wir bedanken uns für deine Zeit bei NoVex RP und hoffen, ` +
                 `dass du eines Tages wieder zurückkommst.\n\n` +
                 `🤝 Bis dahin wünschen wir dir alles Gute und viel Erfolg!\n\n` +
-                `💙 **Dein Vexo-RP-Team sagt Tschüss!**`
+                `💙 **Dein NoVex-RP-Team sagt Tschüss!**`
             )
             .setThumbnail(
                 user.displayAvatarURL({ size: 256 })

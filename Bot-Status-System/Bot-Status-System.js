@@ -145,7 +145,7 @@ function createStatusPanelEmbed(status, reason = null, startTime = null) {
             .setDescription("Bot-Status wird geladen...");
     }
 
-    embed.setFooter({ text: "Vexo RP Bot Status ✧ Automatisches Status-System" });
+    embed.setFooter({ text: "NoVex RP Bot Status ✧ Automatisches Status-System" });
     embed.setTimestamp();
 
     return embed;
@@ -248,7 +248,7 @@ async function sendShutdownNotification(client, reason) {
                             inline: true
                         }
                     )
-                    .setFooter({ text: "Vexo RP Bot Shutdown Notification" })
+                    .setFooter({ text: "NoVex RP Bot Shutdown Notification" })
                     .setTimestamp();
 
                 await owner.send({ embeds: [embed] });

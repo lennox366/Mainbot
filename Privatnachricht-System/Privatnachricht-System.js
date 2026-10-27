@@ -4,7 +4,7 @@
 //
 // Ermöglicht Team-/Administrator-Mitgliedern, über den Befehl
 // !privatnachricht einem beliebigen Server-Mitglied eine private
-// Discord-DM im Vexo RP-Design zu senden.
+// Discord-DM im NoVex RP-Design zu senden.
 //
 // Eigenständiges Modul – greift NICHT in bestehende Systeme
 // (Gang-System, Dev-Aufgaben-System, RP-Logs-System, etc.) ein.
@@ -280,7 +280,7 @@ function initializePrivatnachrichtSystem(client, options = {}) {
             .setTitle(
                 session.mode === "search"
                     ? `🔎 Suchergebnisse für „${session.query}"`
-                    : "📩 Vexo RP – Mitglied auswählen"
+                    : "📩 NoVex RP – Mitglied auswählen"
             )
             .setDescription(
                 session.mode === "search"
@@ -319,14 +319,14 @@ function initializePrivatnachrichtSystem(client, options = {}) {
     async function sendPrivateMessagePanel(channel, userId) {
         const embed = new EmbedBuilder()
             .setColor(0x5865F2)
-            .setTitle("📩 Vexo RP – Privatnachricht")
+            .setTitle("📩 NoVex RP – Privatnachricht")
             .setDescription(
                 "Hier kannst du einem Server-Mitglied eine private Nachricht senden.\n\n" +
                 "🔹 Mitglied auswählen\n" +
                 "🔹 Nachricht schreiben\n" +
                 "🔹 Nachricht wird anschließend per DM versendet"
             )
-            .setFooter({ text: "Vexo RP" })
+            .setFooter({ text: "NoVex RP" })
             .setTimestamp();
 
         const row = new ActionRowBuilder().addComponents(
@@ -639,13 +639,13 @@ function initializePrivatnachrichtSystem(client, options = {}) {
                     .setColor(0x5865F2)
                     .setTitle("📩 Private Nachricht")
                     .setDescription(
-                        `Du hast eine private Nachricht von **Vexo RP** erhalten, ${targetMember}.`
+                        `Du hast eine private Nachricht von **NoVex RP** erhalten, ${targetMember}.`
                     )
                     .addFields(
                         { name: "👤 Von", value: "Team / Administration", inline: false },
                         { name: "💬 Nachricht", value: nachricht, inline: false }
                     )
-                    .setFooter({ text: "Vexo RP" })
+                    .setFooter({ text: "NoVex RP" })
                     .setTimestamp();
 
                 try {
